@@ -82,8 +82,6 @@ mid = (nums[(nums1Size + nums2Size) / 2] + nums[(nums1Size + nums2Size - 1) / 2]
 
 
 
-
-
 ### 7.[最接近的三数之和](https://leetcode-cn.com/problems/3sum-closest/)
 
 ​	详见C++解法中网页的笔记，排序 + 双指针。

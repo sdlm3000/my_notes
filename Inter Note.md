@@ -122,7 +122,7 @@
 
 ​	`git restore`: 把文件从暂存区中移出
 
-​	`git reset`: 版本回退，git reset --hard HEAD~n 代表回退n次，git reset --hard [版本号] 代表回退到对于的commit。git reset HEAD -- path/filename 是将文件从暂存区移出的一种方法。
+​	`git reset`: 版本回退，git reset --hard HEAD~n 代表回退n次，git reset --hard [版本号] 代表回退到对于的commit。git reset HEAD -- path/filename 是将文件从暂存区移出的一种方法。如果commit之后，想撤回刚刚的操作，可以使用 git reset --soft HEAD^
 
 
 
