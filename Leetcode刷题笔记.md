@@ -187,7 +187,8 @@ mid = (nums[(nums1Size + nums2Size) / 2] + nums[(nums1Size + nums2Size - 1) / 2]
 
 ​	详见C++解法。
 
-- 
+- 纯粹的暴力解法必然超时。
+- 本题为16题的扩展题，难度较大，基本思路是对每一行进行遍历，每一列看成类似于16题中的柱子，对每一行进行遍历时，遇到1则柱长加1，遇到0就直接将柱长清零，然后对每一行调用一次16题的选择柱状图中的最大矩形。
 
 
 
@@ -195,11 +196,25 @@ mid = (nums[(nums1Size + nums2Size) / 2] + nums[(nums1Size + nums2Size - 1) / 2]
 
 ​	详见C++解法。
 
+- 比较简单，可以使用类似双指针的算算法实现一次遍历。
+
 
 
 ### 19.[数组拆分 I](https://leetcode-cn.com/problems/array-partition-i/)
 
 ​	详见C++解法。
+
+- 很简单，就是排序过后的数组对应的值最小。
+
+
+
+###20.[搜索旋转排序数组](https://leetcode-cn.com/problems/search-in-rotated-sorted-array/)
+
+
+
+
+
+### 21.[旋转图像](https://leetcode-cn.com/problems/rotate-image/)
 
 
 
