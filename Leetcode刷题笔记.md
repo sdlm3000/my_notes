@@ -210,15 +210,16 @@ mid = (nums[(nums1Size + nums2Size) / 2] + nums[(nums1Size + nums2Size - 1) / 2]
 
 ###20.[搜索旋转排序数组](https://leetcode-cn.com/problems/search-in-rotated-sorted-array/)
 
+​	详见C++解法。
 
+- 暴力解法，一次遍历然后匹配目标值。时间复杂度为$O(N)$，空间复杂度为$O(1)$。
+- 二分查找，可以在仔细看一下这种**非完全有序的数组**如何进行二分查找。
 
 
 
 ### 21.[旋转图像](https://leetcode-cn.com/problems/rotate-image/)
 
+​	详见C++解法。
 
-
-
-
-
+- 我的暴力解法，每对应的四个数，进行三次交换，完成一次旋转，需要注意每个数的坐标表示，也可以使用四数交换的方式取代目前的两两swap的方式。
 
