@@ -116,7 +116,7 @@
 
 ​	`git branch`
 
-​	`git checkout`: 除了切换和新建分支外，还可以删除原来修改的文件
+​	`git checkout`: 除了切换和新建分支外，还可以删除原来修改的文件，git checkout -b XXXX 新建分支并切换到该分支
 
 ​	`git stash`
 
