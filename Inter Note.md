@@ -4,23 +4,23 @@
 
 ##MY LOG
 
-###2021.05.11
+### 2021.05.11
 
-####linux文件解压
+#### linux文件解压
 
 ​	xxx.tar.gz文件使用指令`tar zxvf`解压 ；对于xxx.tar.xz文件使用指令`xz -d xxx.tar.xz`将其解压成xxx.tar，然后使用`tar xvf xxx.tar`解压；对于xxx.zip文件使用指令`unzip xxx.zip`解压。
 
-####ssh密钥生成问题
+#### ssh密钥生成问题
 
-​	许多 Git 服务器都使用 SSH 公钥进行认证。 为了向 Git 服务器提供 SSH 公钥，如果某系统用户尚未拥有密钥，必须事先为其生成一份。 在linnux中使用`$ ssh-keygen -t rsa -C "youremail@example.com"`，密钥类型可以用 -t 选项指定。如果没有指定则默认生成用于SSH-2的RSA密钥。这里使用
+​	许多 Git 服务器都使用 SSH 公钥进行认证。 为了向 Git 服务器提供 SSH 公钥，如果某系统用户尚未拥有密钥，必须事先为其生成一份。 在linnux中使用`$ ssh-keygen -t rsa -C "youremail@example.com"`，密钥类型可以用 -t 选项指定。如果没有指定则默认生成用于SSH-2的RSA密钥。这里使用的是rsa。邮箱可以随意填写，之后生成的过程就全部回车即可。
 
-的是rsa。邮箱可以随意填写，之后生成的过程就全部回车即可。
+​	之后可以使用` cat ~/.ssh/id_rsa.pub`查看生成的哈希数。
 
-####远程连接和传输文件
+#### 远程连接和传输文件
 
 ​	使用`ssh root@xxx.xxx.xxx.xxx`（连接对象的IP地址），而且好像要保证主机的IP和其在一个局域网（前三个相同）；传输文件使用`scp 源文件位置 目标位置`。
 
-####网络设备问题
+#### 网络设备问题
 
 ​	一台PC设备中不同网卡有不同的IP地址，如有线网卡的IP和无线网卡的IP，windows中可以在网络设置中对网卡进行设置；Linux中`ifconfig`指令用于显示或设置网络设备，同时也可以设置网络设备的状态，或是显示目前的设置，如`ifconfig eth0 donw`为关闭eth0网卡，`ifconfig eth0 up`为打开eth0网卡。
 
