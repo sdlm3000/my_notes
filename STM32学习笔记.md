@@ -18,7 +18,7 @@
 
 ​	W25Q128有三个8位的状态寄存器，下面以状态寄存器1为例。
 
-<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20210228111734441.png" alt="image-20210228111734441" style="zoom:80%;" />
+<img src="images/STM32学习笔记/image-20210228111734441.png" alt="image-20210228111734441" style="zoom:80%;" />
 
 ​	S0和S1都为只读位，**S0为1时为擦除/写正在进行，S0为0时为空闲**，这个状态位很重要，在擦除操作和写操作时，**S1为1时写使能，S1为0时写禁止**，在**写页、写状态寄存器、擦除操作**前都需要**写使能**，操作完后，需要**判断BUSY位**，其为0才能进行下一步操作。其他位都和flash的写保护相关，置1后就不能进行写操作或者擦除操作，具体详见芯片手册。
 
@@ -72,7 +72,7 @@ typedef struct lcd
 
 ​	关于LCD的画点的流程图如下：
 
-<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20210323172055565.png" style="zoom:85%;" />
+![image-20210323172055565](images/STM32学习笔记/image-20210323172055565.png)
 
 
 
@@ -127,11 +127,11 @@ typedef struct lcd
 
 ​	SysTick—系统定时有4 个寄存器，简要介绍如下。在使用SysTick 产生定时的时候，只需要配置前三个寄存器，最后一个校准寄存器不需要使用。
 
-<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20210401231157698.png" style="zoom:100%">
+![image-20210401231157698](images/STM32学习笔记/image-20210401231157698-16454997634731.png)
 
 ​	重点关注CTRL寄存器，其主要的寄存器位如下所示。
 
-<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20210401231353202.png">
+![image-20210401231353202](images/STM32学习笔记/image-20210401231353202-16454998193002.png)
 
 ​	在HAL库中，在内核中SysTick的主要配置函数如下所示。
 

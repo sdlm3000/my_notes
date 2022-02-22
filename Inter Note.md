@@ -96,7 +96,7 @@
 
 #### git
 
-<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20210525210303619.png" style=zoom:100%>
+![image-20210525210303619](images/Inter Note/image-20210525210303619.png)
 
 ​	`git add`
 
@@ -136,7 +136,7 @@
 
 ​	修改Soc_code/ambarella/boards/cv22_walnut/rootfs/default/etc/init.d/Meg-acm.sh的脚本文件，将检测4g是否能联网函数中的ping修改成AT指令的形式。
 
-![image-20210521111411150](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20210521111411150.png)
+![image-20210521111411150](images/Inter Note/image-20210521111411150-16454999648541.png)
 
 #### 4g固件升级流程
 
@@ -174,9 +174,9 @@ qDebug() << buf;
 
 ​	最后输出会多9个字符：
 
-![image-20210524195045901](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20210524195045901.png)
+​	![image-20210524195045901](images/Inter Note/image-20210524195045901.png)
 
-​	目前还不知道是什么问题。
+目前还不知道是什么问题。
 
 ### 2021.05.25
 
@@ -198,7 +198,7 @@ qDebug() << buf;
 
 #### 定时器的时钟源问题
 
-![image-20210601103657803](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20210601103657803.png)
+![image-20210601103657803](images/Inter Note/image-20210601103657803.png)
 
 ​	一般都是默认使用内部时钟，目前理解如果做级联的定时器应该是使用外部时钟模式1，然后外部时钟模式2有一个引脚可以外接脉冲信号。
 
@@ -260,7 +260,7 @@ extern "C" {
 
 #### 问题2
 
-![image-20210608155041033](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20210608155041033.png)
+![image-20210608155041033](images/Inter Note/image-20210608155041033.png)
 
 ​	为什么头文件声明函数中还需要这个extern
 
@@ -268,7 +268,7 @@ extern "C" {
 
 #### 问题1
 
-![image-20210609090444070.png](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20210609090444070.png)
+![image-20210609090444070](images/Inter Note/image-20210609090444070.png)
 
 ​	为什么前面有两个类似于强制转换的东西？
 
@@ -314,7 +314,7 @@ extern "C" {
 
 stm32F1的UART相关的中断事件：
 
-![image-20210626111639124](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20210626111639124.png)
+![image-20210626111639124](images/Inter Note/image-20210626111639124.png)
 
 
 

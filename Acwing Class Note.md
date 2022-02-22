@@ -511,19 +511,19 @@ for(int i=1, j=0; i<=n; i++){
 
 ​	字符匹配算法的暴力解法是完全遍历，即需要判断n*m次，而KMP算法的核心是首先提取模式串本身的规矩，使用ne[M]数组存放P[M]中每个值对应的next指针，其中索引i对应的next指针需要满足p[1, next]对应的字符串与p[i-next+1,i]对应的字符串相等。以字符串abcabe为例：
 
-![image-20210508160828923](C:\ADATA\all_work\my_notes\images\Acwing Class Note\image-20210508160828923.png)
+![image-20210508160828923](images\Acwing Class Note\image-20210508160828923.png)
 
 其中索引5对应的next指针应为2，即ne[5]=2，则ne[1...6] = {0, 0, 0, 1, 2, 0}。
 
 ​	然后比较时，如果模式串的第j+1个和长文本串的第i个不匹配就将ne[j]+1与i进行比较，如此迭代循环，可以避免从头开始比较。
 
-![image-20210508162435024](C:\ADATA\all_work\my_notes\images\Acwing Class Note\image-20210508162435024.png)
+![image-20210508162435024](images\Acwing Class Note\image-20210508162435024.png)
 
 ###5. Trie树
 
 ​	Trie树又叫做前缀树或者字典树。假设Trie数中依次存入inn、int、tea和ton，如下图所示。
 
-<img src="C:\ADATA\all_work\my_notes\images\Acwing Class Note\image-20210509154144006.png" style="zoom:80%">
+<img src="images\Acwing Class Note\image-20210509154144006.png" style="zoom:80%">
 
 ```c++
 // son[][]存储树中每个节点的子节点
@@ -649,7 +649,7 @@ if (h[find(x)] == null)
 
 ​	没有特定的模板，可以理解为递归
 
-![image-20211126203440101](C:\ADATA\all_work\my_notes\images\Acwing Class Note\image-20211126203440101.png)
+![image-20211126203440101](images\Acwing Class Note\image-20211126203440101.png)
 
 ​	广度优先搜索（BFS），最短路特性。其代码实现需要用到队列。常见显示如下：
 
@@ -755,19 +755,19 @@ int bfs()
 
 ### 4.最短路
 
-![image-20211203095823551](C:\ADATA\all_work\my_notes\images\Acwing Class Note\image-20211203095823551.png)
+![image-20211203095823551](images\Acwing Class Note\image-20211203095823551.png)
 
 
 
 ### 4.最小生成树
 
-![image-20211203101211989](C:\ADATA\all_work\my_notes\images\Acwing Class Note\image-20211203101211989-16393635494501.png)
+![image-20211203101211989](images\Acwing Class Note\image-20211203101211989-16393635494501.png)
 
 
 
 ### 5.二分图
 
-![image-20211203101240578](C:\ADATA\all_work\my_notes\images\Acwing Class Note\image-20211203101240578.png)
+![image-20211203101240578](images\Acwing Class Note\image-20211203101240578.png)
 
 
 
@@ -779,7 +779,7 @@ int bfs()
 
 ### 1.01背包问题
 
-![image-20211126083449246](C:\ADATA\all_work\my_notes\images\Acwing Class Note\image-20211126083449246.png)
+![image-20211126083449246](images\Acwing Class Note\image-20211126083449246.png)
 
 
 
