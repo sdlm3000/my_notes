@@ -298,3 +298,14 @@ mid = (nums[(nums1Size + nums2Size) / 2] + nums[(nums1Size + nums2Size - 1) / 2]
 
 ### 28.
 
+
+
+
+
+# 问题总结
+
+## C++语法相关
+
+1. C++中scanf不支持对string，只能使用char *
+
+​	
