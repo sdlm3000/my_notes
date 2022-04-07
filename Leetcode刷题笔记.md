@@ -28,7 +28,7 @@
 
 
 
-###2.寻找两个正序数组的中位数
+### 2.寻找两个正序数组的中位数
 
 ​	[详见C中的解法](https://leetcode-cn.com/problems/median-of-two-sorted-arrays/)，比较典型的双指针的题目。
 
@@ -41,7 +41,7 @@ mid = (nums[(nums1Size + nums2Size) / 2] + nums[(nums1Size + nums2Size - 1) / 2]
 
 
 
-###3.盛最多水的容器
+### 3.盛最多水的容器
 
 ​	[详见C中的解法](https://leetcode-cn.com/problems/container-with-most-water/)，解法也类似双指针，比较简单。
 
@@ -49,7 +49,7 @@ mid = (nums[(nums1Size + nums2Size) / 2] + nums[(nums1Size + nums2Size - 1) / 2]
 
 
 
-###4.接雨水
+### 4.接雨水
 
 ​	[详见C中的解法](https://leetcode-cn.com/problems/trapping-rain-water/)，双指针。
 
@@ -57,7 +57,7 @@ mid = (nums[(nums1Size + nums2Size) / 2] + nums[(nums1Size + nums2Size - 1) / 2]
 
 
 
-###5.[最大子序和](https://leetcode-cn.com/problems/maximum-subarray/)
+### 5.[最大子序和](https://leetcode-cn.com/problems/maximum-subarray/)
 
 ​	动态规划。
 
@@ -155,7 +155,7 @@ mid = (nums[(nums1Size + nums2Size) / 2] + nums[(nums1Size + nums2Size - 1) / 2]
 
 
 
-###14.[买卖股票的最佳时机 II](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-ii/)
+### 14.[买卖股票的最佳时机 II](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-ii/)
 
 ​	详见C++解法。
 
@@ -173,7 +173,7 @@ mid = (nums[(nums1Size + nums2Size) / 2] + nums[(nums1Size + nums2Size - 1) / 2]
 
 
 
-###16.[柱状图中最大的矩形](https://leetcode-cn.com/problems/largest-rectangle-in-histogram/)
+### 16.[柱状图中最大的矩形](https://leetcode-cn.com/problems/largest-rectangle-in-histogram/)
 
 ​	详见C++解法。
 
@@ -208,7 +208,7 @@ mid = (nums[(nums1Size + nums2Size) / 2] + nums[(nums1Size + nums2Size - 1) / 2]
 
 
 
-###20.[搜索旋转排序数组](https://leetcode-cn.com/problems/search-in-rotated-sorted-array/)
+### 20.[搜索旋转排序数组](https://leetcode-cn.com/problems/search-in-rotated-sorted-array/)
 
 ​	详见C++解法。
 
@@ -225,7 +225,7 @@ mid = (nums[(nums1Size + nums2Size) / 2] + nums[(nums1Size + nums2Size - 1) / 2]
 
 
 
-###22.[下一个排列](https://leetcode-cn.com/problems/next-permutation/)
+### 22.[下一个排列](https://leetcode-cn.com/problems/next-permutation/)
 
 ​	详见C++解法。
 
@@ -253,7 +253,7 @@ mid = (nums[(nums1Size + nums2Size) / 2] + nums[(nums1Size + nums2Size - 1) / 2]
 
 
 
-###25.[最长连续序列](https://leetcode-cn.com/problems/longest-consecutive-sequence/)
+### 25.[最长连续序列](https://leetcode-cn.com/problems/longest-consecutive-sequence/)
 
 ​	详见C++解法。
 

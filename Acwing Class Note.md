@@ -443,6 +443,19 @@ stk[tt];
 
 ​	应用场景：给定一个数组，给出每个数左边离它最近且小于它的数。或者是其他的类似场景。
 
+```C++
+    for(int i=0; i<n; i++){
+        while(tt>0 && a[i]<=stk[tt]) tt--;
+        
+        if(tt==0) printf("-1 ");
+        else printf("%d ", stk[tt]);
+        stk[++tt] = a[i];
+
+    }
+```
+
+
+
 ### 3. 队列
 
 #### 普通队列
@@ -519,7 +532,7 @@ for(int i=1, j=0; i<=n; i++){
 
 ![image-20210508162435024](images\Acwing Class Note\image-20210508162435024.png)
 
-###5. Trie树
+### 5. Trie树
 
 ​	Trie树又叫做前缀树或者字典树。假设Trie数中依次存入inn、int、tea和ton，如下图所示。
 
@@ -579,7 +592,7 @@ p[find(a)] = find(b);
 
 ​	对于并查集还有一些其他的扩展，比如[维护集合大小](https://www.acwing.com/video/262/)和[维护到祖宗节点距离](https://www.acwing.com/video/251/)等。
 
-###7. 堆
+### 7. 堆
 
 ​	堆就是一种基于完全二叉树的结构，分为最大堆和最小堆。最大堆的父节点一定大于它的左右子节点，最小堆则反之。
 
@@ -610,7 +623,7 @@ for(int i=size/2; i; i--) down(i);
 
 ​	[模拟堆](https://www.acwing.com/problem/content/841/)还没有看。
 
-###8. 哈希表
+### 8. 哈希表
 
 #### 拉链法
 
@@ -701,7 +714,7 @@ idx = 0;
 memset(h, -1, sizeof h);
 ```
 
-###3.树与图的遍历
+### 3.树与图的遍历
 
 ​	深度优先遍历：
 
