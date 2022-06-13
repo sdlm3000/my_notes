@@ -130,7 +130,7 @@ double bsearch_3(double l, double r)
 
 ### 3. 高精度
 
-####高精度加法 
+#### 高精度加法 
 
 ```c++
 // 向量中低位存放数字对应的低位，即a[0]中存放个位数，后面也是一样的
@@ -239,7 +239,7 @@ printf("%d\n", S[x2][y2] - S[x2][y1-1] - S[x1-1][y2] + S[x1-1][y1-1]);
 
 #### 一维差分
 
-​	给区间[l, r]中的每个数加上c：B[l] += c, B[r + 1] -= c
+​	给区间[l, r]中的每个数加上c，B[l] += c, B[r + 1] -= c
 
 ```C++
 // 差分函数
@@ -424,7 +424,7 @@ void remove(int a)
 }
 ```
 
-###2. 栈
+### 2. 栈
 
 ```c++
 // tt表示栈顶
@@ -496,6 +496,23 @@ else empty;
 
 ​	[滑动窗口](https://www.acwing.com/problem/content/submission/code_detail/5412402/)，大致懂了，但是没有很理解，这个应该可以解决QT上位机界面的动态图标中自动更新坐标轴的问题，有时间看看。
 
+```c++
+// 若为求最大值
+int hh = 0, tt = -1;
+for (int i = 0; i < n; i ++ )
+{
+    while (hh <= tt && check_out(q[hh])) hh ++ ;	// 判断队头是否滑出窗口
+    // 队尾不单调
+    // 判断新加入的数是否大于此时滑动窗口中的值
+    // 如果大于则原来滑动窗口中的值就没有用处了，让他们出队
+    // 因为新入队的是时间周期比他们长，则最大值至少是新入队的值
+    while (hh <= tt && check(q[tt], i)) tt -- ;		// 注意这个tt--，实际意义是删掉队尾的元素，相当于双端队列的操作
+    q[ ++ tt] = i;
+}
+```
+
+
+
 ### 4. KMP
 
 ​	KMP算法常用于字符串匹配，
@@ -503,7 +520,7 @@ else empty;
 ```c++
 // s[N]是长文本，p[M]是模式串，ne[M]存放next指针，n是s的长度，m是p的长度
 // N>n，M>m，m<=n，从下标1开始存储，不考虑浪费的空间
-
+ne[0] = -1;
 // 求模式串的next数组
 for(int i=2, j=0; i<=m; i++){
     while(j && p[i]!=p[j+1]) j = ne[j];
@@ -519,6 +536,29 @@ for(int i=1, j=0; i<=n; i++){
         // 匹配成功后的操作
         
     }
+}
+
+// 从下标0开始存储
+int strStr(string haystack, string needle) {
+    int ne[needle.size()];
+    ne[0] = 0;	// 很关键
+    for(int i = 1, j = 0; i < needle.size(); i++)
+    {
+        while(j > 0 && needle[i] != needle[j]) j = ne[j - 1];
+        if(needle[i] == needle[j]) j++;
+        ne[i] = j;
+    }
+
+    for(int i = 0, j = 0; i < haystack.size(); i++)
+    {
+        while(j > 0 && haystack[i] != needle[j]) j = ne[j - 1];
+        if(haystack[i] == needle[j]) j++;
+        if(j == needle.size())
+        {
+            return i - needle.size() + 1;
+        }
+    }
+    return -1;
 }
 ```
 
@@ -700,13 +740,17 @@ while(hh <= tt)
 (2) 邻接表：
 
 ```C++
+M = 2 * N;
 // 对于每个点k，开一个单链表，存储k所有可以走到的点。h[k]存储这个单链表的头结点
 int h[N], e[M], ne[M], idx;
 
 // 添加一条边a->b
+// 头插法
 void add(int a, int b)
 {
-    e[idx] = b, ne[idx] = h[a], h[a] = idx ++ ;
+    e[idx] = b;		// 创建结点将b存入
+    ne[idx] = h[a];	// 让结点b指向a的头结点
+    h[a] = idx ++;	// 让a的头结点指向b
 }
 
 // 初始化
@@ -795,23 +839,170 @@ int bfs()
 
 ![image-20211126083449246](images\Acwing Class Note\image-20211126083449246.png)
 
+​	状态转移方程：`f[i][j] = Max(f[i - 1][j], f[i - 1][j - v[i]] + w[i]) `
 
+​	参考代码：
+
+```C++
+// 朴素写法
+for(int i = 1; i <= N; i++)		// 从1个物品到N个物品
+{
+    for(int j = 0; j <= V; j++)	// 从小背包到大背包
+    {
+        f[i][j] = f[i - 1][j];
+        if(j >= v[i]) f[i][j] = max(f[i][j], f[i - 1][j - v[i]] + w[i]);
+    }
+}
+int res = 0;
+for(int i = 1; i <= N; i++) res = max(res, f[i][V]);
+
+// 空间优化    
+for(int i = 1; i <= N; i++)
+{ 
+    // 这个地方做了优化，是从上一个状态的小背包到当前状态的大背包
+    for(int j = V; j >= v[i]; j--)
+    {
+        f[j] = max(f[j], f[j - v[i]] + w[i]);
+    }
+}
+```
+
+​	对于背包问题的理解，可以看这个[动态规划博客](https://www.cnblogs.com/kkbill/p/12081172.html)。
 
 ### 2.完全背包问题
 
+​	
 
+<img src="images/Acwing Class Note/image-20220609160148256.png" alt="image-20220609160148256" style="zoom: 33%;" />
+
+<img src="images/Acwing Class Note/image-20220609160249022.png" alt="image-20220609160249022" style="zoom:33%;" />
+
+​	最终化简后的状态状态转移方程：`f[i][j] = Max(f[i - 1][j], f[i][j - v[i]] + w[i]) `
+
+​	参考代码：
+
+```C++
+for(int i = 1; i <= N; i++)
+{ 
+    // 这个地方做了优化，是从上一个状态的小背包到当前状态的大背包
+    for(int j = v[i]; j <= V; j++)
+    {
+        f[j] = max(f[j], f[j - v[i]] + w[i]);
+    }
+}
+```
 
 
 
 ### 3.多重背包问题
 
+​	朴素解法和完全背包问题的朴素解法类似。
+
+​	参考代码：
+
+```C++
+for(int i = 1; i <= N; i++)
+{
+    cin >> v >> w >> s;
+    for(int j = 1; j <= V; j++)
+    {
+        for(int k = 0; k <= s && k * v <= j; k++)
+        {
+            f[i][j] = max(f[i][j], f[i - 1][j - k * v] + k * w);
+        }
+    }
+}
+```
+
+​	使用二进制优化的多重背包问题：
+
+```C++
+// 将每种物品根据物件个数进行打包
+// 最后相当于有n * log(s)个背包了，即cnt ≈ n * log(s)
+int cnt = 0;
+for(int i = 1; i <= n; i ++){
+    int a, b, s;
+    cin >> a >> b >> s;
+
+    int k = 1;
+    while(k <= s){
+        cnt ++;
+        v[cnt] = k * a;
+        w[cnt] = k * b;
+        s -= k;
+        k *= 2;
+    }
+    if(s > 0){
+        cnt ++;
+        v[cnt] = s * a;
+        w[cnt] = s * b;
+    }
+
+}
+
+//多重背包转化为01背包问题
+for(int i = 1; i <= cnt; i ++){
+    for(int j = m; j >= v[i]; j --){
+        f[j] = max(f[j], f[j - v[i]] + w[i]);
+    }
+}
+
+
+```
+
+
+
+### 4.分组背包问题
+
+<img src="images/Acwing Class Note/image-20220609164458486.png" alt="image-20220609164458486" style="zoom:33%;" />
 
 
 
 
 
+```C++
+for(int i = 1; i <= N; i++)
+{
+    int a;
+    cin >> a;
+    for(int j = 1; j <= a; j++)
+    {
+        cin >> v[j] >> w[j];
+
+    }
+    for(int j = 1; j <= V; j++)
+    {
+        f[i][j] = f[i - 1][j];
+        for(int k = 1; k <= a; k++)
+        {
+            if(j >= v[k]) f[i][j] = max(f[i][j], f[i - 1][j - v[k]] + w[k]);
+        }
+    }
+
+}
+int res = 0;
+for(int i = 1; i <= N; i++) res = max(res, f[i][V]);
 
 
+// 优化后
+for(int i = 1; i <= N; i++)
+{
+    int a;
+    cin >> a;
+    for(int j = 1; j <= a; j++)
+    {
+        cin >> v[j] >> w[j];
+
+    }
+    for(int j = V; j >= 1; j--)
+    {
+        for(int k = 1; k <= a; k++)
+        {
+            if(j >= v[k]) f[j] = max(f[j], f[j - v[k]] + w[k]);
+        }
+    }
+}
+```
 
 
 

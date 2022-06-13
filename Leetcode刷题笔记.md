@@ -263,7 +263,7 @@ mid = (nums[(nums1Size + nums2Size) / 2] + nums[(nums1Size + nums2Size - 1) / 2]
 
 
 
-###26.[数组中重复的数据](https://leetcode-cn.com/problems/find-all-duplicates-in-an-array/)
+### 26.[数组中重复的数据](https://leetcode-cn.com/problems/find-all-duplicates-in-an-array/)
 
 ​	详见C++解法。
 
@@ -273,7 +273,7 @@ mid = (nums[(nums1Size + nums2Size) / 2] + nums[(nums1Size + nums2Size - 1) / 2]
 
 
 
-###27.[乘积最大子数组](https://leetcode-cn.com/problems/maximum-product-subarray/)
+### 27.[乘积最大子数组](https://leetcode-cn.com/problems/maximum-product-subarray/)
 
 ​	详见C++解法。
 
@@ -302,10 +302,142 @@ mid = (nums[(nums1Size + nums2Size) / 2] + nums[(nums1Size + nums2Size - 1) / 2]
 
 
 
+
+
+
+
+# 华为108
+
+### 1. 质因子问题
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # 问题总结
 
 ## C++语法相关
 
-1. C++中scanf不支持对string，只能使用char *
+### 1. C++编写相关
+
+```c++
+// C++的代码空模板
+#include <iostream>
+using namespace std;
+int main(){
+    
+    return 0;
+}
+
+// 常用库函数
+#include <cmath>
+	sqrt()
+        
+#include <algorithm>
+        
+
+
+```
+
+### 2. 输入输出相关
+
+​	C++中使用`cin >> string/char`或者`scanf("%s", char)`（scanf不支持string），都默认以**空格**或者**换行符**作为输入的结尾，对于字符串`hello nowcoder`，它们都只能获取到`hello`。如果想完全获取数据，有以下几种方法：
+
+- 使用`while(cin >> string);`获取每个以空格分开的单词，需要自己拼接。注意`while(scanf("%s", char));`的形式不成立；
+- 使用`getline(cin, str);`的方法获得整行数据；
+- 使用`a = getchar();`接收每个字符，当遇到`\n`时停止接收输入；
+- 使用`scanf("%[^\n]", word);`的方法获取整行数据。其中`^`表示任意字符串，只有在遇到字符`\n`时，输入才会截止。
+
+​	其中第三种和第四种在C语言中也适用
+
+### 3. 引号问题
+
+​	   单引号 ‘a’  ‘A’ 用于指代字符a  A ,  一般用法if(word[i] == 'a') 判断是否为字符a ,  
+
+   	双引号”a" “A” 则用于指代字符串、常量, 一般用法 const char * = "abdcd";
+
+### 4. 字符串常用操作
+
+
+
+
+
+### 5. 常见ASCII码
+
+- '0'~'9' : 48~57
+- 'A'~'Z' : 65~90
+- 'a'~'z' : 97~122
+
+
+
+### 6. 常用函数
+
+1. `tolower(char c)`：将单个字符转化小写，同理有`toupper(char c)`
+2. 
 
 ​	
+
+
+
+
+
+### 7. sort函数的使用
+
+​	添加自定义的比较函数，如下所示：
+
+```C++
+const int N = 100010;
+typedef struct _myPair
+{
+    int l;
+    int r;
+}myPair;
+// 按结构体中r的数值从小到大排序
+bool LLess(const myPair &R1, const myPair &R2)
+{
+    return R1.r < R2.r;
+}
+myPair R[N];
+
+sort(R, R + N, LLess);
+```
+
+
+
+### 8. 优先队列
+
+​	C++中优先队列的使用：
+
+```C++
+#include <queue>
+
+// 小根堆
+priority_queue<int, vector<int>, greater<int>> heap1; // 升序
+// 大根堆
+priority_queue<int, vector<int>, less<int>> heap2;	// 降序
+
+top()		// 访问队头元素
+empty()		// 队列是否为空
+size()		// 返回队列内元素个数
+push()		// 插入元素到队尾 (并排序)
+pop()		// 弹出队头元素
+emplace()	// 原地构造一个元素并插入队列
+swap()		// 交换内容
+```
+
+​	那么我们可以总结出关于大根堆和小根堆的结论：
+
+（1）堆是一棵完全二叉树；
+（2）小根堆的根节点是堆中最小值，大根堆的根节点是堆中最大值；
+（3）堆适合采用顺序存储。
+
