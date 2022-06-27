@@ -82,6 +82,8 @@ mid = (nums[(nums1Size + nums2Size) / 2] + nums[(nums1Size + nums2Size - 1) / 2]
 
 
 
+直接看[题解](https://leetcode.cn/problems/3sum/solution/pai-xu-shuang-zhi-zhen-zhu-xing-jie-shi-python3-by/)
+
 ### 7.[最接近的三数之和](https://leetcode-cn.com/problems/3sum-closest/)
 
 ​	详见C++解法中网页的笔记，排序 + 双指针。
@@ -91,6 +93,8 @@ mid = (nums[(nums1Size + nums2Size) / 2] + nums[(nums1Size + nums2Size - 1) / 2]
   这种方法本质上还是类似于纯粹的暴力解法，只是利用了排序后数据的单调性，排除了很多情况，实际的运行时间不尽如人意。思路上更类似于[三数之和](https://leetcode-cn.com/problems/3sum/)中的官方题解的方法，**但是这两个题目的差别在哪里？**
 
 - leetcode官方解法思路类似于[三数之和](https://leetcode-cn.com/problems/3sum/)中我的个人思路，
+
+​	现在在看没动自己这两题的思路，直接看官方题解吧，基本思路都是i指针从左往右遍历，然后设置两个动态双指针`j = i + 1,k = n - 1` ，每次都遍历这个数组，遍历完一次i++。然后需要注意去重问题
 
 
 
@@ -362,9 +366,9 @@ int main(){
 
 ### 3. 引号问题
 
-​	   单引号 ‘a’  ‘A’ 用于指代字符a  A ,  一般用法if(word[i] == 'a') 判断是否为字符a ,  
+​	单引号 ‘a’  ‘A’ 用于指代字符a  A ,  一般用法if(word[i] == 'a') 判断是否为字符a ,  
 
-   	双引号”a" “A” 则用于指代字符串、常量, 一般用法 const char * = "abdcd";
+​	双引号”a" “A” 则用于指代字符串、常量, 一般用法 const char * = "abdcd";
 
 ### 4. 字符串常用操作
 
@@ -441,3 +445,6 @@ swap()		// 交换内容
 （2）小根堆的根节点是堆中最小值，大根堆的根节点是堆中最大值；
 （3）堆适合采用顺序存储。
 
+
+
+[https://leetcode.cn/problems/3sum/solution/pai-xu-shuang-zhi-zhen-zhu-xing-jie-shi-python3-by/]: 

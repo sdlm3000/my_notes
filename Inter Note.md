@@ -116,13 +116,13 @@
 
 ​	`git branch`
 
-​	`git checkout`: 除了切换和新建分支外，还可以删除原来修改的文件，git checkout -b XXXX 新建分支并切换到该分支
+​	`git checkout`: 除了切换和新建分支外，还可以删除原来修改的文件，git checkout -b XXXX 新建分支并切换到该分支，git checkout branchname切换分支
 
 ​	`git stash`
 
 ​	`git restore`: 把文件从暂存区中移出
 
-​	`git reset`: 版本回退，git reset --hard HEAD~n 代表回退n次，git reset --hard [版本号] 代表回退到对于的commit。git reset HEAD -- path/filename 是将文件从暂存区移出的一种方法。如果commit之后，想撤回刚刚的操作，可以使用 git reset --soft HEAD^
+​	`git reset`: 版本回退，git reset --hard HEAD~n 代表回退n次，git reset --hard [版本号] 代表回退到对于的commit。git reset HEAD -- path/filename 是将文件从暂存区移出的一种方法，git restore --staged . 将全部文件移除暂存区（撤销git add .）。如果commit之后，想撤回刚刚的操作，可以使用 git reset --soft HEAD^
 
 
 
@@ -154,7 +154,7 @@
 
 ​	build.sh用来编译文件，b.sh负责将编译好的上传至A4中，上传不同的源文件需要修改b.sh中的上传位置，同时有的可能需要杀死一些进程才能成功上传。debug方法在代码中使用loge()，然后实时查看A4中/data/a4bsp/stat.log中的信息(使用指令`tail -f stat.log`)。
 
-####linux中操作后台运行程序的方法
+#### linux中操作后台运行程序的方法
 
 ​	在指令是加&为指令在后台运行，一般是常用让cat指令在后台运行。使用`pkill -9 cat`能杀死在后台运行的cat指令。
 

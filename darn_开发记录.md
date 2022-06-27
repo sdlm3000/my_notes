@@ -1,8 +1,8 @@
-# 开发记录
-
 [TOC]
 
 
+
+# 开发记录
 
 ## 功能对应
 
@@ -238,7 +238,7 @@ plt.show()
 
 关于雷达视场图的门数gate和波位数beams的说明：
 
-<img src="images/开发记录/image-20220603155219162.png" alt="image-20220603155219162" style="zoom:50%;" />
+<img src="images/darn_开发记录/image-20220603155219162.png" alt="image-20220603155219162" style="zoom:50%;" />
 
 ​	则需要绘制出这个图线，需要绘制101x17条线。
 
@@ -251,14 +251,43 @@ plt.show()
 
 ### 绘制速度图相关
 
-1. 参数中的thetas和rs似乎是极坐标的表示方法。
+​	目前的一些问题：
 
-2. 下图为JME的正确的速度图。
-3. 目前感觉grid中的坐标数据并不是正常的地理坐标系下的二维坐标
+- [x] 参数中的thetas和rs似乎是极坐标的表示方法。
+- [x] 下图为JME的正确的速度图。
 
-<img src="images/开发记录/image-20220607145109709.png" alt="image-20220607145109709"  />
+<img src="images/darn_开发记录/image-20220607145109709.png" alt="image-20220607145109709" style="zoom:50%;" />
+
+- [x] 目前感觉grid中的速度点的坐标数据为磁纬度经度。需要转化一下
+
+- [ ] 目前关于一些雷达视场图的叠加还需要优化一些细节，同时地图叠加内部处理逻辑需要优化；同时还没有实现速度合成，目前评估感觉不太难，需要对grid数据进行具体的分析。
+- [ ] 目前地图叠加功能不兼容MLT和AACGM的转换。
+
+​	
+
+​	开发进度：
+
+1. 2022/06/14完成的地图叠加的速度图像。
+
+<img src="images/darn_开发记录/image-20220614162727556.png" alt="image-20220614162727556" style="zoom: 33%;" />
 
 
+
+## 绘制对流图相关
+
+​	pydran3.0的绘图结果：
+
+<img src="images/darn_开发记录/image-20220614164805652.png" alt="image-20220614164805652" style="zoom: 80%;" />
+
+​	开发问题：
+
+- [ ] 东经为正，西经为负，在绘制速度线的时候，在东西经180°交接处，会出现BUG。增加判断对180°左右的西经加360°进行处理
+
+<img src="images/darn_开发记录/image-20220615151940550.png" alt="image-20220615151940550" style="zoom: 50%;" />
+
+- [ ] 在绘制对流等高线的时候出现了类似的问题
+
+<img src="images/darn_开发记录/image-20220615213406254.png" alt="image-20220615213406254" style="zoom:50%;" />
 
 ## 雷达数据说明
 
@@ -292,4 +321,47 @@ if coords == Coords.AACGM_MLT or coords == Coords.AACGM:
 ### 1. 地图坐标转换问题
 
 ​	目前pydarn3.0的版本不支持地图的坐标转换，无论是MLT还是AACGM都不支持。
+
+### 2. 修改的源代码文件
+
+- projections.py
+- maps.py
+- grid.py
+- fan.py : 增加地图叠加功能
+
+
+
+
+
+# 常用代码
+
+## python库相关
+
+1. `pip list`：python安转库的列表
+2. `pip install [package]`：安装软件包
+3. `pip uninstall [package]`：卸载软件包
+4. `pip install --upgrade [package]`：升级某个软件包
+5. `conda env list`：查看Python的虚拟环境
+6. `conda create -n [env_name] python=[version]`：创建python的虚拟环境
+7. `conda activate [env_name]`：激活虚拟环境
+8. `conda install [package]`：使用conda安装库
+9. `conda update [package]`：更新库
+
+
+
+## Pydarn相关
+
+1. `conda install -c conda-forge cartopy=0.19`：cartopy的安装
+2. `convert_latlon()`：在地磁坐标和AACGM坐标之间转换
+3. 
+
+
+
+
+
+
+
+## python编程相关
+
+1. `name.shape`：输出变量的维度
 
