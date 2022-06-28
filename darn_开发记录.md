@@ -346,6 +346,7 @@ if coords == Coords.AACGM_MLT or coords == Coords.AACGM:
 7. `conda activate [env_name]`：激活虚拟环境
 8. `conda install [package]`：使用conda安装库
 9. `conda update [package]`：更新库
+10. `conda remove -n [env_name] --all`： 删除环境
 
 
 
@@ -364,4 +365,27 @@ if coords == Coords.AACGM_MLT or coords == Coords.AACGM:
 ## python编程相关
 
 1. `name.shape`：输出变量的维度
+
+
+
+
+
+# 安装说明
+
+ubuntu18中安装cartopy0.20
+conda install proj
+conda install -c conda-forge geos
+pip install git+https://github.com/SciTools/cartopy.git
+
+centos8中安装cartopy0.20：
+conda install proj
+conda install -c conda-forge geos
+sudo yum install gcc
+sudo yum install gcc-c++
+pip install git+https://github.com/SciTools/cartopy.git
+
+pydarn的依赖包：
+pip install PyYAML
+pip install pyDARNio
+pip install aacgmv2
 

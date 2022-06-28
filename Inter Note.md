@@ -2,7 +2,7 @@
 
 [TOC]
 
-##MY LOG
+## MY LOG
 
 ### 2021.05.11
 
@@ -14,7 +14,9 @@
 
 ​	许多 Git 服务器都使用 SSH 公钥进行认证。 为了向 Git 服务器提供 SSH 公钥，如果某系统用户尚未拥有密钥，必须事先为其生成一份。 在linnux中使用`$ ssh-keygen -t rsa -C "youremail@example.com"`，密钥类型可以用 -t 选项指定。如果没有指定则默认生成用于SSH-2的RSA密钥。这里使用的是rsa。邮箱可以随意填写，之后生成的过程就全部回车即可。
 
-​	之后可以使用` cat ~/.ssh/id_rsa.pub`查看生成的哈希数。
+​	之后可以使用` cat ~/.ssh/id_rsa.pub`查看生成的哈希数。把它全部复制到github的SSH Key里面，如下图所示。
+
+<img src="images/Inter Note/image-20220627151009356.png" alt="image-20220627151009356" style="zoom:50%;" />
 
 #### 远程连接和传输文件
 
