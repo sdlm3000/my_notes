@@ -380,31 +380,41 @@ pip install git+https://github.com/SciTools/cartopy.git
 ​	centos8中环境：
 
 ```shell
-# centos8中安装cartopy0.20：
+## centos8中安装cartopy0.20：
 conda install proj
 conda install -c conda-forge geos
 sudo yum install gcc
 sudo yum install gcc-c++
 pip install git+https://github.com/SciTools/cartopy.git
 
-# pydarn的依赖包：
+## pydarn的依赖包：
 pip install PyYAML
 pip install pyDARNio
 pip install aacgmv2
 
-# 射线追踪依赖包：
+## 射线追踪依赖包：
+pip install pandas
 sudo dnf install -y openmpi-devel
 sudo ln -s /usr/lib64/openmpi/bin/mpif90 /usr/bin/mpif90 #Needed for raydarn to 
 sudo ln -s /usr/lib64/openmpi/bin/mpiexec /usr/bin/mpiexec
 # 射线追踪最后的模型文件需要放在 davitpy->models 的文件路径下面
 
-
-pip install pandas
-
-# cdf文件
+## cdf文件
 pip install spacepy
+pip install numpy scipy h5py matplotlib networkx
+sudo yum install ncurses-devel
+# 需要在官网下载cdf包 https://cdf.gsfc.nasa.gov/
+# 进入cdf*dist文件夹
+make all.help
+make OS=linux ENV=gnu CURSES=yes FORTRAN=no UCOPTIONS=-O2 SHARED=yes -j4 all
+make install
+# 在python中需要指明路径
+# 设置环境变量的方法后续研究
+import os
+os.environ["CDF_LIB"]='/home/sdlm/ziwu/cdf38_1-dist-all/cdf38_1-dist/lib'
+from spacepy import pycdf
 
-yum install ncurses-devel
+
 
 ```
 
