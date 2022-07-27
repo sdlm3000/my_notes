@@ -347,6 +347,7 @@ if coords == Coords.AACGM_MLT or coords == Coords.AACGM:
 8. `conda install [package]`：使用conda安装库
 9. `conda update [package]`：更新库
 10. `conda remove -n [env_name] --all`： 删除环境
+11. `sudo apt-get --purge remove `：ubuntu删除包，及其依赖项
 
 
 
@@ -377,6 +378,36 @@ conda install proj
 conda install -c conda-forge geos
 pip install git+https://github.com/SciTools/cartopy.git
 
+​	ubuntu18.04中环境：
+
+```python
+## dokcer安装
+sudo apt install docker
+sudo apt install docker.io
+
+
+## Fortran编译
+sudo apt-get install -y libmpich-dev
+
+## pydarn的依赖包：
+pip install PyYAML
+pip install pyDARNio
+pip install aacgmv2
+pip install matplotlib
+pip install pandas
+
+## 数据爬取依赖包
+pip install requests
+pip install beautifulsoup4
+pip install lxml
+
+## 安装cartopy
+
+
+```
+
+
+
 ​	centos8中环境：
 
 ```shell
@@ -401,7 +432,7 @@ sudo ln -s /usr/lib64/openmpi/bin/mpiexec /usr/bin/mpiexec
 
 ## cdf文件
 pip install spacepy
-pip install numpy scipy h5py matplotlib networkx
+pip install numpy scipy h5py networkx
 sudo yum install ncurses-devel
 # 需要在官网下载cdf包 https://cdf.gsfc.nasa.gov/
 # 进入cdf*dist文件夹
