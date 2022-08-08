@@ -445,4 +445,14 @@ swap()		// 交换内容
 
 
 
-[https://leetcode.cn/problems/3sum/solution/pai-xu-shuang-zhi-zhen-zhu-xing-jie-shi-python3-by/]: 
+### 链表题目相关
+
+​	有时候为了方便处理，可以new一个新的结点作为原链表的头结点：
+
+```c++
+ListNode* dummyHead = new ListNode(0);
+dummyHead->next = head;
+...
+return dummyHead->next;
+```
+
