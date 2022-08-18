@@ -382,9 +382,15 @@ pip install git+https://github.com/SciTools/cartopy.git
 
 ```python
 ## dokcer安装
+sudo apt install make
 sudo apt install docker
 sudo apt install docker.io
 
+## docker 删除
+sudo docker rm -f [ID]		# 删除容器
+sudo docker image rm [ID]	# 删除镜像
+sudo docker image ls		# 查看镜像
+sudo docker container ls	# 查看容器
 
 ## Fortran编译
 sudo apt-get install -y libmpich-dev
