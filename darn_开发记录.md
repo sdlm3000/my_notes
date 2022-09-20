@@ -459,3 +459,144 @@ from spacepy import pycdf
 
 
 
+# 日常记录
+
+## 2022.09.12
+
+​	将IRI2016模型移植，并且按照davitpy中的修改了内部fortran文件，同时好像是 igrf.for 存在存放数据文件的绝对绝对路径长度大于存放路径的字符串长度的情况，会直接终止程序，没有报错信息，需要注意修改，完成对路径的兼容操作，具体模型存放在air14的ubuntu虚拟机中的 /home/sdlm/project/ray_test1/ 中。
+
+​	同时目前发现使用iri2016生成的数据文件和davitpy中iri模型生成的同一个时间点的数据文件，主要是iscat和rays文件大小不一样，对于其他文件大小相同，但是不清楚内部的内容是否一致，目前缺少解码的软件，无法比对文件内容。
+
+<img src="images/darn_开发记录/image-20220913223011920.png" alt="image-20220913223011920" style="zoom:50%;" />
+
+## 2022.09.13
+
+​	测试IRI2016模型+github中的raytrace_mpi.f90文件，生成的数据文件如下，和不替换的raytrace_mpi.f90的生成的文件大小一样。之后主要需要分析一下github中的读取文件的代码和davitpy的区别。
+
+![image-20220914104539016](images/darn_开发记录/image-20220914104539016.png)
+
+## 2022.09.17
+
+### 绘制代码分析	
+
+对于iri2012模型生成的数据文件及读取代码的分析
+
+- ray..dat 为射线的网格数据，对于iri2012模型，在davitpy中的数据读取代码中，该字典的结构为`paths[rtime][raz][rel][]`（其中 raz 应该代表 beam），最后一项包括`nrstep,r,th,gran,nr`。对应读取数据函数为 `readRay()`，图像绘制函数为 `rays.plot()`，单独绘制的图像如下所示。
+
+  在`rays.plot()`函数中好像只使用了`th,r`的数据进行绘制，`aax.plot(rays['th'], rays['r']*1e-3, c=raycolor, zorder=zorder, alpha=alpha)`
+
+<img src="images/darn_开发记录/image-20220917165330604.png" alt="image-20220917165330604" style="zoom:50%;" />
+
+- edens..dat 为背景颜色数据，对于iri2012模型，在davitpy中的数据读取代码中，该字典的结构为`edens[rtime][raz][]`，最后一项包括`th,nel,dip`。对应读取数据函数为 `readEdens()`，图像绘制函数为 `ionos.plot()`，单独绘制的图像如下所示。
+
+  在`ionos.plot()`函数中好像只使用了`th,nel`的数据进行绘制。
+
+  ```python
+  X, Y = np.meshgrid(self.edens[time][beam]['th'], ax.Re + np.linspace(60,560,250))
+  im = aax.pcolormesh(X, Y, np.log10( self.edens[time][beam]['nel'] ), 
+              vmin=nel_lim[0], vmax=nel_lim[1], cmap=nel_cmap,rasterized=nel_rasterize)
+  ```
+
+<img src="images/darn_开发记录/image-20220917164947296.png" alt="image-20220917164947296" style="zoom:50%;" />
+
+- iscat..dat 为射线追踪黑线数据，对于iri2012模型，在davitpy中的数据读取代码中，该字典的结构为`isc[rtime][raz][rel][]`，最后一项包括`nstp,r,th,gran,rel,w,nr,lat,lon,h`
+
+- gscat..dat 为射线追踪黑线数据，对于iri2012模型，在davitpy中的数据读取代码中，该字典的结构为`gsc[rtime][raz][rel][]`，最后一项包括`r,th,gran,lat,lon`。与 iscat..dat 一起使用，对应读取数据函数为 `readScatter()`，图像绘制函数为 `scatter.plot()`，单独绘制的图像如下所示。
+
+  对于 gscat..dat 似乎只使用到了`r,th`，而且`r`没有参与到实际的绘制中。
+
+  ```python
+  if len(rays['r']) == 0: continue
+      _ = aax.scatter(rays['th'], ax.Re*np.ones(rays['th'].shape), 
+                      color='0', zorder=zorder)
+  ```
+
+  对于 iscat..dat 使用了`w,nstp,th,r,h,rel`
+
+  ```python
+  if weighted:
+      wmin = np.min( [ r['w'].min() for r in self.isc[time][beam].values() if r['nstp'] > 0] )
+      wmax = np.max( [ r['w'].max() for r in self.isc[time][beam].values() if r['nstp'] > 0] )
+  
+      for ir, (el, rays) in enumerate( sorted(self.isc[time][beam].items()) ):
+          if rays['nstp'] == 0: continue
+              t = rays['th']
+              r = rays['r']*1e-3
+              spts = np.array([t, r]).T.reshape(-1, 1, 2)
+              h = rays['h']*1e-3
+              rel = np.radians( rays['rel'] )
+              r = np.sqrt( r**2 + h**2 + 2*r*h*np.sin( rel ) )
+              t = t + np.arcsin( h/r * np.cos( rel ) )
+              epts = np.array([t, r]).T.reshape(-1, 1, 2)
+              segments = np.concatenate([spts, epts], axis=1)
+              lcol = LineCollection( segments, zorder=zorder )
+              if weighted:
+                  _ = lcol.set_cmap( cmap )
+                  _ = lcol.set_norm( plt.Normalize(0, 1) )
+                  _ = lcol.set_array( ( rays['w'] - wmin ) / wmax )
+                  else:
+                      _ = lcol.set_color('0')
+                      _ = aax.add_collection( lcol )
+  ```
+
+<img src="images/darn_开发记录/image-20220917164107432.png" alt="image-20220917164107432" style="zoom:50%;" />
+
+
+
+### 具体数据分析
+
+​	目前查看ray..dat绘制图像相关的数据，自己制作的iri2016的生产的数据明显和原始davitpy中生成的数据不一致。第一个我做的，第二个图为davitpy
+
+![image-20220917214538327](images/darn_开发记录/image-20220917214538327.png)
+
+![image-20220917214454382](images/darn_开发记录/image-20220917214454382.png)
+
+​	然后对于edens..dat，我自己生成的数据有全是-1的，所以基本断定是ForTran代码生成的数据问题了。
+
+
+
+### 测试superdarn的fort文件夹
+
+​	首先东西在 fort -> rtmpi 文件夹中，makefile文件最好修改一下make clean，然后直接make好像会报错，如下所示。目前感觉是 fort -> iri2016 中的igrf.o没有删除和重新生成吧，还是Makefile的问题，需要修改。
+
+​	目前的解决方案为在 iri2016 中首先把 makefile 中的缩进修改一下，然后 make clean，再 make。然后在 rtmpi 中在 Makefile 中clean指令中新增两条
+
+```makefile
+find . -name "*~" -o -name "*.o" -o -name "*.mod" | xargs rm -f $(EXEC)
+rm -f $(EXEC) $(IRIOBJS)
+```
+
+​	然后在 rtmpi 中 make clean，再 make，就会正常生成可执行文件
+
+<img src="images/darn_开发记录/image-20220917222255974.png" alt="image-20220917222255974" style="zoom:50%;" />
+
+​	目前是这样，明天再设置打印信息试试
+
+<img src="images/darn_开发记录/image-20220917230401577.png" alt="image-20220917230401577" style="zoom:50%;" />
+
+## 2022.09.18
+
+### 测试fort
+
+​	目前定位到 raytrace_mpi.f90 中的 IRI_SUB 函数调用失败。而且目前只保留了 IRI2016 和 rtmpi 的文件夹。
+
+​	目前发现具体的调用关系如下：
+
+```C
+raytrace_mpi.f90:IRI_ARR() -> irisub.for:IRI_SUB() -> igrf.for:FELDCOF() -> igrf.for:GETSHC()	
+```
+
+​	然后在 igrf.for:FELDCOF() 会因为找不到 dgrf..dat 文件而直接 STOP 掉，没有任何报错信息。
+
+​	**解决方法**：把 IRI2016 的全部数据文件放入 rtmpi 文件夹中，好像就可以运行了
+
+​	目前测试生成2006年6月3日12点的射线追踪，下面分别为davitpy和fort的结果。
+
+<img src="images/darn_开发记录/image-20220918221044182.png" alt="image-20220918221044182" style="zoom:50%;" />
+
+![image-20220918222310656](images/darn_开发记录/image-20220918222310656.png)
+
+​	目前好像是其他的文件没有生成。比如 gscat..dat 和 iscat..dat 。明天再来具体看看
+
+
+
