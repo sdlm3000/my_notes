@@ -14,6 +14,14 @@
 
 
 
+
+
+
+
+的
+
+
+
 #### 2.1 太阳风数据 ×
 
 ​	这个功能在pydarn中没有具体的函数对应，但是它本身就是普通的数据绘图，只要能正常读取数据就行了。
@@ -457,6 +465,39 @@ from spacepy import pycdf
 
 
 
+### 用户安装
+
+正常ubuntu安装：
+
+```shell
+# 安装好python3.9环境的Miniconda
+# 进入对应的python3.9的环境
+# 在pydarn的文件夹中直接运行
+make install
+
+```
+
+docker中安装说明：
+
+```shell
+# 先安转Miniconda
+chmod 777 Miniconda...
+./Miniconda...
+source ~/.bashrc
+
+# 安装一些必要的包
+apt update
+apt install python3-tk
+apt install -y tk-dev
+apt install -y openssh-server
+apt install -y vim
+
+# 修改rt.py，新增--allow-run-as-root
+
+# 安装pydarn
+make install_docker
+```
+
 
 
 # 日常记录
@@ -511,7 +552,7 @@ from spacepy import pycdf
                       color='0', zorder=zorder)
   ```
 
-  对于 iscat..dat 使用了`w,nstp,th,r,h,rel`
+  对于 iscat..dat 使用了`w,nstp,th,r,h,rel`，而图像绘制值使用了`th,r,h,rel`
 
   ```python
   if weighted:
@@ -578,6 +619,8 @@ rm -f $(EXEC) $(IRIOBJS)
 
 ### 测试fort
 
+​	位于air14虚拟机中的`/home/sdlm/project/model_test/models_fort/`路径中。
+
 ​	目前定位到 raytrace_mpi.f90 中的 IRI_SUB 函数调用失败。而且目前只保留了 IRI2016 和 rtmpi 的文件夹。
 
 ​	目前发现具体的调用关系如下：
@@ -592,11 +635,127 @@ raytrace_mpi.f90:IRI_ARR() -> irisub.for:IRI_SUB() -> igrf.for:FELDCOF() -> igrf
 
 ​	目前测试生成2006年6月3日12点的射线追踪，下面分别为davitpy和fort的结果。
 
-<img src="images/darn_开发记录/image-20220918221044182.png" alt="image-20220918221044182" style="zoom:50%;" />
+<img src="images/darn_开发记录/image-20220918221044182.png" alt="image-20220918221044182" style="zoom: 67%;" />
 
 ![image-20220918222310656](images/darn_开发记录/image-20220918222310656.png)
 
-​	目前好像是其他的文件没有生成。比如 gscat..dat 和 iscat..dat 。明天再来具体看看
+​	目前好像是其他的文件没有生成，而且fort一直运行不会终止。比如 gscat..dat 和 iscat..dat 。明天再来具体看看
+
+
+
+## 2022.09.20
+
+### 测试fort
+
+​	上次不能运行的fort中的程序，现在突然又可以运行了，如下所示。
+
+![image-20220920162445795](images/darn_开发记录/image-20220920162445795.png)
+
+![image-20220920162506582](images/darn_开发记录/image-20220920162506582.png)
+
+## 2022.09.22
+
+### python绘图部分开发
+
+​	新生成的文件在数据读取和解析上存在一定问题，首先在`_readHeader`上的数据读取存在问题。可能是因为fort生成的格式与之前的有所区别。
+
+​	目前打算采用read函数按二进制格式读取davitpy和fort生成的数据文件，对比里面的数据格式和内容的区别。
+
+
+
+## 2022.09.23
+
+​	目前发现fort生成的rays..dat数据需要按如下方式读取。
+
+<img src="images/darn_开发记录/image-20220923153658709.png" alt="image-20220923153658709" style="zoom:80%;" />
+
+​	在header的顺序和类型略有区别，本质上是raytrace_mpi.f90中param结构体的内容设计不一样，以及在读写顺序不一样。然后后面实际的数据可能就是在iri2016的模型生成的数据不一样，会比davitpy多一组数据，就是在原来的代码中注释掉的pran。
+
+​	但是目前fort生成的数据内容和davitpy中的还是对不上，需要进一步定位。
+
+<img src="images/darn_开发记录/image-20220923154318833.png" alt="image-20220923154318833" style="zoom:80%;" />
+
+​	目前测试**fort需要并行数为 2 才能得出与davitpy一样的结果**，但是好像步长会不太一样。
+
+​	不对，最后发现还是不太一样，在readray中的循环读取中总体循环了552次，不是很明白这个意思。
+
+## 2022.09.26
+
+​	正常就是552次，对应该时间点就是用552条数据，然后实际绘制过程中有一个step的参数，demo中step都是10，所以最后绘制出来就是56条线。
+
+​	目前就是感觉 fort 生成的数据有问题。有可能还是因为引用的数据文件的路径不对，但是也不会产生报错的那种。
+
+​	明天再测试一下 github 中的案例。
+
+## 2022.09.27
+
+​	尝试了一下github中的，数据生成根据没有什么问题，能按照davitpy的代码直接出图，但是目前比较的新的年份的绘制结果还存疑，明天仔细试试，然后具体运行的话还需要解决一下数据文件路径的问题，明天看看。
+
+## 2022.09.28
+
+​	今天尝试修改 github 的那个版本，解决模型中路径的问题。修改 /home/sdlm/project/ray_test_git/my_radar_plot 路径下的代码。
+
+​	没有去修改代码，而是直接使用 `os.chdir(PAHT_RTFORT)` 将shell路径跳转到模型和数据文件所在的文件夹，然后再运行 mpiexec 指令，就解决了。
+
+​	目前测试2017.09.03的可以绘制，2018年的也可以，但是到了2019就不太行了，然后就是 iscat..dat 和 gscat..dat 的数据有问题。
+
+## 2022.09.29
+
+- 首先重新在github上下载模型进行尝试。
+
+  测试后还是生成的 iscat..dat 和 gscat..dat 的数据格式有问题。
+
+- 目前发现github中的和davitpy的生成的gscat..dat格式不一样，所以davitpy中读取数据的方式需要修改成github中读取数据的代码。修改后gscat..dat可以正常用于绘图。
+
+<img src="images/darn_开发记录/image-20220929153603329.png" alt="image-20220929153603329" style="zoom: 67%;" />
+
+- iscat..dat数据文件感觉就是生成的又问题呀，每组数据的步长一直为0，很奇怪。
+- 目前将github中的raytrace_mpi.f90改为davitpy后，生成的iscat..dat，还是不太对，每一组的数据的步长也不太一样，具体内容还没有去比对
+
+<img src="images/darn_开发记录/image-20220929170436722.png" alt="image-20220929170436722" style="zoom:67%;" />
+
+
+
+## 2022.10.03
+
+- 开始对比iscat..dat的数据，目前发现rel的数据好像不太对。第一个是改进后的github版本，第二个是davitpy版本
+
+<img src="images/darn_开发记录/image-20221003160656360.png" alt="image-20221003160656360" style="zoom: 67%;" />![image-20221003160829413](images/darn_开发记录/image-20221003160829413.png)
+
+## 2022.10.04
+
+- 目前打印了github生成的iscat..dat中所有数据，没有与davitpy中rel值相类似的范围的值。说明生成iscat..dat的代码有问题，可能还是raytrace_mpi.f90的问题，不能直接使用davitpy的，还是需要修改一下，但是github中的输出的iscat..dat又是乱数据。目前觉得需要分析模型中的iscat..dat生成的代码，才能进一步定位问题，太难了，，，，
+- 原来github上模型可以使用，是我自己rt.py中关于iscat..dat和gscat..dat的问题读取有问题，按照github中rt.py进行替换即可。以下是目前绘制的2017年的图像。然后2018年6月3号之前的都可以（它不一定是分界点），之后的就不太行了。
+
+<img src="images/darn_开发记录/image-20221004164639689.png" alt="image-20221004164639689" style="zoom: 67%;" />
+
+- 尝试将github中的模型的数据文件和fortran代码替换为fort的试试。
+
+  失败，单纯替换没有作用，最后绘制的图像为空图
+
+- 累了，，，不知道应该怎么尝试了，，
+
+- 
+
+### 2022.10.25
+
+​	最近尝试画图，发现好像cartopy的库用不了了，好像是geos的库需要升级为3.7的版本了。
+
+​	https://libgeos.org/usage/download/这个网站可以下载3.7以上的，然后按里面的安装就行。
+
+​	然后使用`sudo conda install -c conda-forge cartopy=0.20`好像就可以安装了
+
+​	然后注意一下`export CDF_LIB=/app/source/cdf38_1-dist/lib`这个好像有用。
+
+- requests bs4 不知道为什么也少了？
+
+
+
+
+
+### 2022.12.19
+
+​	目前numpy的版本为1.23，matplotlib版本为3.3.5
 
 
 
