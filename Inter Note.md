@@ -100,7 +100,7 @@
 
 ![image-20210525210303619](images/Inter Note/image-20210525210303619.png)
 
-​	`git add`
+​	`git add`：git add -u 只添加跟踪文件的修改
 
 ​	`git diff`
 
@@ -108,7 +108,7 @@
 
 ​	`git push`
 
-​	`git log`: 显示日志信息，git log --pretty=oneline 代表一行显示log信息
+​	`git log`: 显示日志信息，git log --pretty=oneline 代表一行显示log信息，git log --oneline --graph --decorate --all显示提交关系图
 
 ​	`git reflog`: 显示完整的日志信息。
 
