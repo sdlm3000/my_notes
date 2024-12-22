@@ -1,4 +1,4 @@
-# linuxNode
+# linuxNote
 
 [TOC]
 
@@ -107,3 +107,37 @@ UUID=d5abbd65-9681-490f-ab70-bf3844091a33 /               ext4    errors=remount
 - 第六字段：指定分区是否被fsck检测，0代表不检测，其他数组代表优先级，越小越高。一般设置为0，系统分区设置1
 
 ​		一般在修改后，直接调用`mount  -a`查看是否修改正确。
+
+
+
+
+
+
+
+## git常用指令
+
+
+
+```shell
+# 创建本地仓库
+git init --bare <name>
+
+# 只将追踪的文件加入暂存区
+git add -u
+
+# 从暂存区移出
+git reset <file>
+# 全部移出
+git reset
+# Git 2.23版本以上
+git restore --staged <file>
+git restore --staged .
+
+# 移出暂存区并取消对文件的跟踪
+git rm --cached <file>
+git rm --cached -r <directory>
+
+
+
+```
+
