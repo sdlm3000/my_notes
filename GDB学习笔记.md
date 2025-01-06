@@ -95,6 +95,9 @@ layout prev
 layout next
 # 关闭布局
 layout off
+
+# 开启在子进程的调试
+set follow-fork-mode child
 ```
 
 <img src="images/GDB学习笔记/image-20241228195729388.png" alt="image-20241228195729388" style="zoom:70%;" />
