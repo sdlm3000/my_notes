@@ -49,8 +49,8 @@ mount [-t 文件系统] [-L 卷标名] [-o 特殊选项] 设备文件名 挂载�
 # 假设要将光盘/dev/sr0挂载到/mnt/sr文件夹上（可以是任意文件夹）
 mount /dev/sr0 /mnt/sr
 # 卸载，以下两个指令都可以
-unmount /dev/sr0
-unmount /mnt/sr
+umount /dev/sr0
+umount /mnt/sr
 
 ```
 
@@ -59,6 +59,10 @@ unmount /mnt/sr
 <img src="images/linuxNote/image-20241126220737791.png" alt="image-20241126220737791" style="zoom:40%;" />
 
 ### 文件系统分区
+
+#### MBR
+
+​		MBR分区表最大仅支持2TB。
 
 ```shell
 fdisk -l		# 查看所有能被识别到的存储设备，并显示分区信息
@@ -82,6 +86,30 @@ mkfs -t ext4 /dev/sdb1
 # 挂载分区
 mount /dev/sdb1 /disk1
 ```
+
+
+
+#### GPT
+
+​		GPT支持最大18EB（1EB=100万TB）的分区
+
+```shell
+# 设置为gpt
+sudo parted /dev/sdb1 mklabel gpt
+# 0~100%都分配给dev/sdb1
+sudo parted -a optimal /dev/sdb1 mkpart primary 0% 100%
+
+# 重新读取分区表
+partprobe
+# 格式化分区
+mkfs -t ext4 /dev/sdb1
+# 挂载分区
+mount /dev/sdb1 /disk1
+```
+
+
+
+
 
 ### 文件系统的自动挂载
 
