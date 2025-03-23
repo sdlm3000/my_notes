@@ -94,15 +94,9 @@ mount /dev/sdb1 /disk1
 ​		GPT支持最大18EB（1EB=100万TB）的分区
 
 ```shell
-# 设置为gpt
-sudo parted /dev/sdb1 mklabel gpt
-# 0~100%都分配给dev/sdb1
-sudo parted -a optimal /dev/sdb1 mkpart primary 0% 100%
+# 设置为gpt 0~100%都分配给dev/sdb1 ext4格式
+sudo parted /dev/sda mklabel gpt mkpart primary ext4 0% 100%
 
-# 重新读取分区表
-partprobe
-# 格式化分区
-mkfs -t ext4 /dev/sdb1
 # 挂载分区
 mount /dev/sdb1 /disk1
 ```
