@@ -406,10 +406,34 @@ int main(int argc, char const *argv[])
 
 
 
-### UDP组播
+### UDP多播
+
+
+
+在同一个局域网中，多播通讯的网络设备的ip需要在同一个网段中。只有加入组播组的接收者，才能接收到组播数据。
+
+
+
+```c++
+struct in_addr {
+    in_addr_t s_addr;
+}
+
+struct ip_mreq {
+    struct in_addr imr_multiaddr.s_addr;	// 多播组IP 224.0.0.0到239.255.255.255
+    struct in_addr imr_interface.s_addr;	// 将要添加到多播组的IP
+}
+```
+
+
+
+
+
+
 
 ```C
-### 客户端
+// 客户端（发送者），令IP为 192.168.128.10
+// 往多播组 224.0.0.1:9999 发送数据
 #include <stdio.h>
 #include <stdlib.h>     // exit
 #include <sys/types.h>
@@ -437,10 +461,11 @@ int main(int argc, char const *argv[])
     printf("socket = %d\n", sockfd);
 
     // 填充多播信息结构体
-    struct sockaddr_in broadcastAdd;
-    broadcastAdd.sin_family = AF_INET;
-    broadcastAdd.sin_addr.s_addr = inet_addr(argv[1]);  // 主机的地址为255，如 192.168.16.255
-    broadcastAdd.sin_port = htons(atoi(argv[2]));
+    struct sockaddr_in groupCastAddr;
+    groupCastAddr.sin_family = AF_INET;
+    // 假设输入为 224.0.0.1:9999
+    groupCastAddr.sin_addr.s_addr = inet_addr(argv[1]);  // 多播组IP 224.0.0.0到239.255.255.255
+    groupCastAddr.sin_port = htons(atoi(argv[2]));
 
     // 发送数据
     char buf[N] = "";
@@ -462,6 +487,8 @@ int main(int argc, char const *argv[])
 
 
 ```C
+// 服务端（接收者），令 IP 为 192.168.128.11
+// 加入多播组 224.0.0.1:9999 接收数据
 #include <stdio.h>
 #include <stdlib.h>     // exit
 #include <sys/types.h>
@@ -470,7 +497,6 @@ int main(int argc, char const *argv[])
 #include <arpa/inet.h>  // htons inet_addr
 #include <unistd.h>     // close
 #include <string.h>
-
 
 #define N       128
 
@@ -501,12 +527,14 @@ int main(int argc, char const *argv[])
     
     // 填充组播信息结构体
     struct sockaddr_in broadcastAdd;
-    broadcastAdd.sin_family = AF_INET;
-    broadcastAdd.sin_addr.s_addr = inet_addr(argv[1]);  // 224.0.0.0 ~ 239.255.255.255
-    broadcastAdd.sin_port = htons(atoi(argv[2]));
+    groupCastAddr.sin_family = AF_INET;
+    // 输入的多播地址和端口号要和发送端的一样
+    // 224.0.0.1:9999
+    groupCastAddr.sin_addr.s_addr = inet_addr(argv[1]);  // 224.0.0.0 ~ 239.255.255.255
+    groupCastAddr.sin_port = htons(atoi(argv[2]));
 
     // 将服务器的网络信息结构体与套接字绑定
-    if(bind(sockfd, (struct sockaddr *)&broadcastAdd, sizeof(broadcastAdd)) == -1) {
+    if(bind(sockfd, (struct sockaddr *)&groupCastAddr, sizeof(groupCastAddr)) == -1) {
         perror("fail to bind");
         exit(1);
     }
