@@ -473,7 +473,7 @@ int main(int argc, char const *argv[])
 
         fgets(buf, N ,stdin);
         buf[strlen(buf) - 1] = '\0';
-        if(sendto(sockfd, buf, N, 0, (struct sockaddr *)&broadcastAdd, sizeof(broadcastAdd)) == -1) {
+        if(sendto(sockfd, buf, N, 0, (struct sockaddr *)&groupCastAddr, sizeof(groupCastAddr)) == -1) {
             perror("fail to sendto");
             exit(1);
         }
@@ -526,7 +526,7 @@ int main(int argc, char const *argv[])
     }
     
     // 填充组播信息结构体
-    struct sockaddr_in broadcastAdd;
+    struct sockaddr_in groupCastAddr;
     groupCastAddr.sin_family = AF_INET;
     // 输入的多播地址和端口号要和发送端的一样
     // 224.0.0.1:9999
