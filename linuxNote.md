@@ -506,7 +506,92 @@ git restore --staged .
 git rm --cached <file>
 git rm --cached -r <directory>
 
+# HEAD介绍
+# HEAD 是一个指针，指向当前分支的最新提交（commit）
+# HEAD^ 上一个提交，等价于 HEAD~1
+# HEAD^^ 上上一个提交，等价于 HEAD~2
+
+# 回退到上一个版本，将提交部分放回暂存区
+# 若要回退到特定的提交，将HEAD^改为提交的哈希值即可
+git reset --soft HEAD^
+# 回退到上一个版本，将提交部分放回工作区
+git reset --mixed HEAD^
+# 回退到上一个版本，将提交部分的修改都丢弃
+git reset --hard HEAD^
+
+# 图形化显示
+# --oneline 每个提交一行，简洁显示；--graph 在左边画 ASCII 树形结构
+# --all 显示所有分支；--decorate 显示分支名和 tag
+git log --oneline --graph --all --decorate
+# 配置别名，git lg等价于下述指令
+git config --global alias.lg "log --oneline --graph --all --decorate"
+
+# 查看某次提交内容的修改
+git show <commit>
+# 对比两版本差异
+git diff <commit1> <commit2>
+# 某个文件修改历史
+git log -p <file>
+
+# 撤销远端的提交
+# 方法1，会在远端将提交记录删除，适合单人开发
+# 首先在本地撤销对应的修改，根据实际需求使用上述回退指令
+# 强制推送到远端
+git push origin HEAD --force	# git push --force
+
+# 方法2，生成新的反向提交，保持历史记录不变，团队协作最安全，推荐！
+# 最好一次一次的撤销，同时撤销多个需要按一定的规则编写，比较麻烦
+# 运行后会弹出vim界面，里面可以修改提交的具体内容，直接:wq也行
+git revert HEAD
+git push origin HEAD	# git push
+
+
+
+
 
 
 ```
+
+
+
+## LINUX常用指令
+
+#### 修改系统时间
+
+```shell
+## 方法1
+# 修改系统时间
+sudo date -s "2025-08-17 23:59:00"
+# 将系统时间写入硬件RTC
+sudo hwclock -w
+# 读取硬件时间检验
+sudo hwclock -r
+
+## 方法2，适用于systemd的系统
+# 设置系统时间并写入硬件RTC
+sudo timedatectl set-time "2025-08-17 23:59:00"
+
+## 如果设置失败，可能是因为系统开启了NTP等授时服务
+# 关闭NTP授时
+sudo timedatectl set-ntp false
+# 开启NTP授时
+sudo timedatectl set-ntp true
+
+```
+
+
+
+#### sudo同时执行多个命令
+
+```shell
+## 按照如下格式
+sudo sh -c "..."
+# 例如设置系统时间并写入硬件
+# &&表示第一个执行成功才会执行下一个，失败则不执行下一个
+sudo sh -c "date -s '2025-08-17 23:59:00' && hwclock -w"
+# ;表示无论第一个是否执行成功都会执行下一个
+sudo sh -c "date -s '2025-08-17 23:59:00';clock -w"
+```
+
+
 
