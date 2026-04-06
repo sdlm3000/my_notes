@@ -523,6 +523,7 @@ git reset --hard HEAD^
 # --oneline 每个提交一行，简洁显示；--graph 在左边画 ASCII 树形结构
 # --all 显示所有分支；--decorate 显示分支名和 tag
 git log --oneline --graph --all --decorate
+
 # 配置别名，git lg等价于下述指令
 git config --global alias.lg "log --oneline --graph --all --decorate"
 
@@ -544,10 +545,6 @@ git push origin HEAD --force	# git push --force
 # 运行后会弹出vim界面，里面可以修改提交的具体内容，直接:wq也行
 git revert HEAD
 git push origin HEAD	# git push
-
-
-
-
 
 
 ```

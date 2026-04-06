@@ -2,9 +2,98 @@
 
 [TOC]
 
+## 常用配置
+
+​	首先，编辑用户目录下的 `~/.vimrc` 文件（如果没有则会自己创建），如下所示，注意写到`.vimrc`中需要把注释行都删除掉
+
+```shell
+## 基础显示配置
+" 显示行号
+set number
+" 显示相对行号（当前行是绝对行号，上下行为相对行号，方便跳转）
+set relativenumber
+" 显示光标所在列号
+set ruler
+" 打开语法高亮
+syntax on
+" 自动检测文件类型（用于适配不同语言的缩进规则）
+filetype on
+" 根据文件类型自动加载对应的插件和缩进规则
+filetype plugin indent on
+" 搜索时忽略大小写（输入大写字母时会精确匹配）
+set ignorecase
+set smartcase
+" 搜索结果实时高亮
+set hlsearch
+" 输入搜索内容时实时显示匹配结果
+set incsearch
+" 禁止折行（长行不自动换行，方便查看代码结构）
+set nowrap
+" 显示光标所在行的高亮
+set cursorline
+
+
+## 缩进与格式配置
+" Tab 宽度为 4 个空格（根据需求可改为 2）
+set tabstop=4
+" 自动缩进时的空格数（与 tabstop 保持一致）
+set shiftwidth=4
+" 将 Tab 键输入转换为空格（避免不同环境下 Tab 显示差异）
+set expandtab
+" 新行自动继承上一行的缩进
+set autoindent
+" 智能缩进（根据语法自动调整，如代码块、循环等）
+set smartindent
+" 当按退格键时，一次删除 shiftwidth 个空格（与缩进匹配）
+set softtabstop=4
+
+## 编辑操作优化
+" 启用鼠标操作（支持在终端中用鼠标选中文本、点击跳转等）
+set mouse=a
+" 允许在插入模式下使用退格键删除任意字符
+set backspace=indent,eol,start
+" 开启撤销历史记录（支持多级撤销，默认已开启，可设置更大的缓存）
+set undofile
+set undodir=~/.vim/undo  " 撤销历史保存目录（需手动创建：mkdir -p ~/.vim/undo）
+" 自动保存（当切换窗口或失去焦点时）
+set autowrite
+" 光标不会跳到行首/行尾外（避免光标"跑丢"）
+set whichwrap=b,s,<,>,[,]
+
+## 编码与兼容配置
+" 设置默认编码为 UTF-8
+set encoding=utf-8
+" 文件读取时尝试的编码格式（解决中文乱码）
+set fileencodings=utf-8,gbk,gb2312,cp936
+" 终端编码（与系统终端保持一致，避免输出乱码）
+set termencoding=utf-8
+" 禁止生成备份文件（如 filename~）
+set nobackup
+set nowritebackup
+" 禁止生成交换文件（如 .filename.swp，意外退出时的临时文件）
+set noswapfile
+
+
+## 快捷键与自定义映射（可选）
+" 按 Ctrl + s 保存（部分终端可能需要先关闭流控制：stty -ixon）
+nnoremap <C-s> :w<CR>
+inoremap <C-s> <Esc>:w<CR>a
+" 按 Ctrl + q 退出
+nnoremap <C-q> :q<CR>
+" 快速切换窗口（Vim 分屏后，按 Ctrl + h/j/k/l 切换方向）
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+```
+
+
+
+
+
 ## 常用操作
 
-## 移动
+### 移动
 
 ​	在一般模式先对光标进行移动
 
