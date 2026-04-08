@@ -252,6 +252,17 @@ export HADOOP_HOME=/opt/module/hadoop-3.3.5/
 
 #### 2. hadoop HA高可用配置
 
+​	按照如下的方式进行部署配置
+
+|      |   hadoop1   |     hadoop2     |     hadoop3     |
+| :--: | :---------: | :-------------: | :-------------: |
+|      |  zookeeper  |    zookeeper    |    zookeeper    |
+| HDFS |  NameNode   |    NameNode     |                 |
+| HFDS |  DataNode   |    DataNode     |    DataNode     |
+| YARN |             | ResourceManager | ResourceManager |
+| YARN | NodeManager |   NodeManager   |   NodeManager   |
+|      |             |                 |                 |
+
 配置core-site.xml，在原来的core-site.xml中的<configuration>内推荐property的配置
 
 ```xml
@@ -366,7 +377,7 @@ export HADOOP_HOME=/opt/module/hadoop-3.3.5/
         <name>yarn.nodemanager.aux-services</name>
         <value>mapreduce_shuffle</value>
     </property>
-    <!-- 开启YARN HA -->
+    <!-- 启用 ResourceManager HA 功能 -->
     <property>
         <name>yarn.resourcemanager.ha.enabled</name>
         <value>true</value>
@@ -381,15 +392,29 @@ export HADOOP_HOME=/opt/module/hadoop-3.3.5/
     </property>
     <property>
         <name>yarn.resourcemanager.hostname.rm1</name>
-        <value>hadoop1</value>
+        <value>hadoop3</value>
     </property>
     <property>
         <name>yarn.resourcemanager.hostname.rm2</name>
         <value>hadoop2</value>
     </property>
+    <!-- 设置访问网址和端口 -->
+    <property>
+		<name>yarn.resourcemanager.webapp.address.rm1</name>
+    	<value>hadoop3:8088</value>
+    </property>
+    <property>
+		<name>yarn.resourcemanager.webapp.address.rm2</name>
+    	<value>hadoop2:8088</value>
+    </property>
     <property>
         <name>yarn.resourcemanager.zk-address</name>
         <value>hadoop1:2181,hadoop2:2181,hadoop3:2181</value>
+    </property>
+    <!-- 启用重启 ResourceManager 后保留其恢复状态的功能 -->
+    <property>
+		<name>yarn.resourcemanager.recovery.enabled</name>
+		<value>true</value>
     </property>
 </configuration>
 ```
@@ -405,7 +430,7 @@ export HADOOP_HOME=/opt/module/hadoop-3.3.5/
 </configuration>
 ```
 
-​	配置workers
+​	配置workers，workers里面负责指定谁为dataNode。假设我只需要指定hadoop1和hadoop3为DataNode，则下述文件中删除hadoop2，然后修改hdfs-site.xml中的副本数为2即可。
 
 ```shell
 vim workers
@@ -453,7 +478,7 @@ start-yarn.sh
 
 #### 设置启动脚本
 
-​	在主设备中设置一键启动和停止脚本
+​	在主设备中设置一键启动和停止脚本，以下的`/opt/module/zookeeper-3.7.2`和`/opt/module/hadoop-3.3.5`以具体的路径为准：
 
 ```shell
 ## start-hadoop-ha.sh
@@ -495,7 +520,6 @@ nodes="hadoop1 hadoop2 hadoop3"
 /opt/module/hadoop-3.3.5/sbin/stop-dfs.sh
 
 for node in $nodes; do
-  ssh $node "/opt/module/hadoop-3.3.5/sbin/hadoop-daemon.sh stop journalnode"
   ssh $node "/opt/module/zookeeper-3.7.2/bin/zkServer.sh stop"
 done
 
@@ -504,6 +528,21 @@ echo "集群已全部停止！"
 ```
 
 ​	在启动脚本中远程启动zkServer.sh如果报错找不到JAVA_HOME，则需要在`/opt/module/zookeeper-3.7.2/bin/zkEnv.sh`中的文件首部加入`export JAVA_HOME=/opt/module/jdk1.8.0_471`，每台设备都需要设置。
+
+​	运行成功后查看NameNode和ResourceManager的主备状态。
+
+```shell
+# 查看所有 NameNode 状态
+hdfs haadmin -getAllServiceState
+
+# 查看所有 RM 状态
+# 实际可能会出现yarn与系统中的npm中的yarn指令冲突，需要加上yarn的路径，如
+# /opt/module/hadoop-3.3.5/bin/yarn rmadmin -getAllServiceState
+yarn rmadmin -getAllServiceState
+
+```
+
+
 
 
 
