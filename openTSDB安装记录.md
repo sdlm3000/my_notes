@@ -401,11 +401,11 @@ export HADOOP_HOME=/opt/module/hadoop-3.3.5/
     <!-- 设置访问网址和端口 -->
     <property>
 		<name>yarn.resourcemanager.webapp.address.rm1</name>
-    	<value>hadoop3:8088</value>
+    	<value>hadoop3:8089</value>
     </property>
     <property>
 		<name>yarn.resourcemanager.webapp.address.rm2</name>
-    	<value>hadoop2:8088</value>
+    	<value>hadoop2:8089</value>
     </property>
     <property>
         <name>yarn.resourcemanager.zk-address</name>
@@ -459,12 +459,12 @@ hdfs zkfc -formatZK
 # 只对 hadoop1 执行格式化Namenode
 hdfs namenode -format
 
-## 以下操作应该不是必须的
+########## 以下操作应该不是必须的
 # 启动 hadoop1 的NameNode
 hdfs --daemon start namenode
-
 # hadoop2 同步元数据
 hdfs namenode -bootstrapStandby
+########## 以上操作应该不是必须的
 
 # 启动hadoop1和hadoop2中的 ZKFC
 hdfs --daemon start zkfc
@@ -476,7 +476,7 @@ start-yarn.sh
 
 
 
-#### 设置启动脚本
+#### 运行设置启动脚本
 
 ​	在主设备中设置一键启动和停止脚本，以下的`/opt/module/zookeeper-3.7.2`和`/opt/module/hadoop-3.3.5`以具体的路径为准：
 
@@ -516,9 +516,14 @@ echo "停止 Hadoop HA 集群..."
 
 nodes="hadoop1 hadoop2 hadoop3"
 
+
+echo -e "\n❌ 1. 停止 YARN..."
 /opt/module/hadoop-3.3.5/sbin/stop-yarn.sh
+
+echo -e "\n❌ 2. 停止 HDFS..."
 /opt/module/hadoop-3.3.5/sbin/stop-dfs.sh
 
+echo -e "\n❌ 3. 停止所有 ZooKeeper..."
 for node in $nodes; do
   ssh $node "/opt/module/zookeeper-3.7.2/bin/zkServer.sh stop"
 done
@@ -532,6 +537,15 @@ echo "集群已全部停止！"
 ​	运行成功后查看NameNode和ResourceManager的主备状态。
 
 ```shell
+# 主设备中使用jps显示如下
+3696 DataNode
+3314 QuorumPeerMain
+3938 JournalNode
+4164 DFSZKFailoverController
+5956 Jps
+3542 NameNode
+4616 NodeManager
+
 # 查看所有 NameNode 状态
 hdfs haadmin -getAllServiceState
 
@@ -542,31 +556,139 @@ yarn rmadmin -getAllServiceState
 
 ```
 
+​	访问 Web 界面：`http://hadoop1:9870`（HDFS）、`http://hadoop2:8089`（YARN），能够正常访问代表hadoop部署成功
 
+#### 高可用验证
 
+##### c++程序示例
 
-
-#### 运行过程
-
-​	在hadoop1中运行
-
-```shell
-# 初始化NameNode（仅首次执行）
-hdfs namenode -format
-
-# 启动HDFS
-start-dfs.sh
-```
-
-​	在hadoop2中运行
+​	配置环境变量
 
 ```shell
-# 因为在yarn-site.xml中配置了ResourceManager为hadoop2
-# 启动YARN
-start-yarn.sh
+# 添加环境变量
+vim /etc/profile.d/opentsdb_env.sh
+
+# C++_HOME
+export LD_LIBRARY_PATH=$HADOOP_HOME/lib/native:$JAVA_HOME/jre/lib/amd64/server:$LD_LIBRARY_PATH
+# 仅交互式终端才执行 Hadoop classpath，桌面不加载
+if [ -n "$PS1" ] && [ -d $HADOOP_HOME ]; then
+    export CLASSPATH=$($HADOOP_HOME/bin/hadoop classpath --glob):$CLASSPATH
+fi
 ```
 
-​	访问 Web 界面：`http://hadoop1:9870`（HDFS）、`http://hadoop2:8088`（YARN），能够正常访问代表hadoop部署成功
+​	
+
+```c++
+## c++程序，100ms写入一个文件，写100个
+#include <iostream>
+#include <cstring>
+#include <string>
+#include <chrono>
+#include <thread>
+#include "hdfs.h"
+
+using namespace std;
+
+int main() {
+    // ==============================================
+    // 🔥 HA 高可用写法：连接集群名，不连具体机器
+    // ==============================================
+    const char* hdfsHost = "mycluster";  // 你 hdfs-site.xml 里的 nameservice
+    int hdfsPort = 0;                    // HA 模式必须写 0
+
+    // 连接 HDFS HA 集群
+    hdfsFS fs = hdfsConnect(hdfsHost, hdfsPort);
+    if (!fs) {
+        std::cerr << "❌ 连接 HDFS HA 失败！" << std::endl;
+        return -1;
+    }
+    std::cout << "✅ 连接 HDFS HA 成功（自动识别主节点）" << endl;
+
+    // 文件名从 1 开始递增
+    int fileIndex = 1;
+
+    // 无限循环写入（想停止按 Ctrl+C）
+    while (fileIndex <= 100) {
+        // ===================== 拼接递增文件名 =====================
+        string fileName = "/user/test/ha_test" + to_string(fileIndex) + ".txt";
+        const char* path = fileName.c_str();
+
+        // 写入内容（带序号）
+        string data = "这是第 " + to_string(fileIndex) + " 个文件，100ms 自动生成！";
+
+        // ===================== 写入文件 =====================
+        hdfsFile writeFile = hdfsOpenFile(fs, path, O_WRONLY | O_CREAT, 0, 0, 0);
+        if (!writeFile) {
+            std::cerr << "❌ 打开文件失败：" << path << endl;
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            continue;
+        }
+
+        // 写入数据
+        hdfsWrite(fs, writeFile, data.c_str(), data.size());
+        cout << "✅ 写入成功：" << path << endl;
+        hdfsCloseFile(fs, writeFile);
+
+        // 序号 +1
+        fileIndex++;
+
+        // ===================== 等待 100ms =====================
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
+    // 关闭连接（程序正常退出才会走到）
+    hdfsDisconnect(fs);
+    return 0;
+}
+
+## 编译
+g++ hdfs_ha.cpp -o hdfs_ha -I$HADOOP_HOME/include -L$HADOOP_HOME/lib/native -L$JAVA_HOME/jre/lib/amd64/server -lhdfs -ljvm
+
+## 运行
+./hdfs_ha > text.txt &
+```
+
+##### 高可用验证流程
+
+​	常用指令：
+
+```shell
+# 查看hadoop目录内容，其他常见操作与基本shell指令类似，将-ls替换为其他即可
+hdfs dfs -ls [hadoop目录]
+
+# 上传整个文件或文件夹
+hdfs dfs -put [本地文件/本地文件夹] [hadoop目录]
+# 下载
+hdfs dfs -get [HDFS路径] [本地路径]
+
+```
+
+
+
+​	循环存储验证：
+
+- 正常启动hadoop集群，确认主namenode节点为hadoop1
+- 运行上述c++程序后，快速kill掉hadoop1中namenode
+- 使用`hdfs dfs -ls /user/test/`查看是否有100个文件，正常在kill了hadoop1中namenode后，程序还是能正常存放文件的
+
+
+
+​	存储文件副本自动备份验证：
+
+- 在hadoop1挂掉后，在hdfs中上传一个大文件
+- 然后重启集群，查看在hadoop1中是否将大文件自动备份
+
+```shell
+# 每个 HDFS 文件被切成 128MB（默认）块
+# 块文件在 DataNode 上叫：blk_xxxx，带校验文件
+# 如下所示的路径中有很多subdir，里面有很多blk
+/opt/module/hadoop-3.3.5/data/dfs/data/current/BP-1737057284-192.168.120.131-1775460042390/current/finalized
+
+# 在集群重启前查看hadoop1上述路径的文件夹大小
+du -sh /opt/module/hadoop-3.3.5/data/dfs/data/current/BP-1737057284-192.168.120.131-1775460042390/current/finalized
+# 重启后再查看，一般会自动将大文件备份，能正常肯定该文件夹变大
+
+```
 
 
 
@@ -589,4 +711,85 @@ sudo vim /etc/profile.d/opentsdb_env.sh
 export HBASE_HOME=/opt/module/hbase
 export PATH=$PATH:$HBASE_HOME/bin
 
+
+    <property>
+        <name>hbase.unsafe.stream.capability.enforce</name>
+        <value>false</value>
+    </property>
+
+    <property>
+        <name>hbase.wal.provider</name>
+        <value>filesystem</value>
+    </property>
+
+    <property>
+        <name>hbase.regionserver.wal.async.sink.enabled</name>
+        <value>false</value>
+    </property>
+
 ```
+
+
+
+
+
+#### hbase的集群启动脚本
+
+
+
+```shell
+## start-hadoop-ha.sh
+#!/bin/bash
+echo "======================================="
+echo "      Hadoop HA 集群 一键启动脚本       "
+echo "         主节点自动控制所有节点          "
+echo "======================================="
+
+# ====================== 【必须修改：你的3台机器名】 ======================
+nodes="hadoop1 hadoop2 hadoop3"
+namenode_nodes="hadoop1 hadoop2"
+# =======================================================================
+
+echo -e "\n✅ 1. 启动所有节点 ZooKeeper..."
+for node in $nodes; do
+  ssh $node "/opt/module/zookeeper-3.7.2/bin/zkServer.sh start"
+done
+
+echo -e "\n✅ 2. 一键启动 HDFS（NameNode、DataNode、JournalNode、DFSZKFailoverController）..."
+/opt/module/hadoop-3.3.5/sbin/start-dfs.sh
+
+echo -e "\n✅ 3. 一键启动 YARN（ResourceManager、NodeManager）..."
+/opt/module/hadoop-3.3.5/sbin/start-yarn.sh
+
+echo -e "\n✅ 4. 启动 HBase 集群（HMaster + HRegionServer）..."
+/opt/module/hbase/bin/start-hbase.sh
+
+echo -e "\n======================================="
+echo "              启动完成！                "
+echo "======================================="
+jps
+
+
+## stop-hadoop-ha.sh
+#!/bin/bash
+echo "停止 Hadoop HA 集群..."
+
+nodes="hadoop1 hadoop2 hadoop3"
+
+echo -e "\n❌ 1. 停止 HBase 集群..."
+/opt/module/hbase/bin/stop-hbase.sh
+
+echo -e "\n❌ 2. 停止 YARN..."
+/opt/module/hadoop-3.3.5/sbin/stop-yarn.sh
+
+echo -e "\n❌ 3. 停止 HDFS..."
+/opt/module/hadoop-3.3.5/sbin/stop-dfs.sh
+
+echo -e "\n❌ 4. 停止所有 ZooKeeper..."
+for node in $nodes; do
+  ssh $node "/opt/module/zookeeper-3.7.2/bin/zkServer.sh stop"
+done
+
+echo "集群已全部停止！"
+```
+
