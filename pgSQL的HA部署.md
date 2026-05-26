@@ -371,12 +371,59 @@ sudo -u postgres /usr/lib/postgresql/12/bin/initdb -D /var/lib/postgresql/12/mai
 
 
 
+### keepalived
 
 
-```
-我三台设备的IP分别为192.168.120.131、192.168.120.132、192.168.120.133，然后一些相关的目录为  data_dir: /var/lib/postgresql/12/main
-  config_dir: /etc/postgresql/12/main
-  bin_dir: /usr/lib/postgresql/12/bin，请给我完整的能使用的patroni的配置，我是两个节点的，后续还需要配置keepalive的VIp为192.168.120.100
+
+```shell
+# hadoop1
+sudo vim /etc/keepalived/keepalived.conf
+
+global_defs {
+    router_id PG_HA_1
+}
+
+vrrp_script check_patroni {
+    script "/etc/keepalived/check_patroni.sh"
+    interval 2
+    weight -20
+    fall 2
+    rise 2
+}
+
+vrrp_instance VI_1 {
+    state BACKUP
+    interface ens33
+    virtual_router_id 51
+    priority 110
+    advert_int 1
+    unicast_src_ip 192.168.120.131
+    unicast_peer {
+        192.168.120.132
+    }
+    authentication {
+        auth_type PASS
+        auth_pass 1111
+    }
+    virtual_ipaddress {
+        192.168.120.200/24
+    }
+    track_script {
+        check_patroni
+    }
+}
+
+sudo vim check_patroni.sh
+
+#!/bin/bash
+status=$(/usr/local/bin/patroni -c /etc/patroni/patroni.yml list | grep $(hostname) | awk '{print $6}')
+if [ "$status" = "Leader" ]; then
+    exit 0
+else
+    exit 1
+fi
+
+sudo chmod +x /etc/keepalived/check_patroni.sh
 ```
 
 
@@ -384,110 +431,53 @@ sudo -u postgres /usr/lib/postgresql/12/bin/initdb -D /var/lib/postgresql/12/mai
 
 
 ```shell
-scope: pg-ha
-name: pg1
-namespace: /db/
+# hadoop2
+sudo vim /etc/keepalived/keepalived.conf
 
-restapi:
-  listen: 0.0.0.0:8008
-  connect_address: 192.168.120.131:8008
+global_defs {
+    router_id PG_HA_2
+}
 
-etcd:
-  hosts:
-    - 192.168.120.131:2379
-    - 192.168.120.132:2379
-    - 192.168.120.133:2379
+vrrp_script check_patroni {
+    script "/etc/keepalived/check_patroni.sh"
+    interval 2
+    weight -20
+    fall 2
+    rise 2
+}
 
-bootstrap:
-  dcs:
-    ttl: 30
-    loop_wait: 10
-    retry_timeout: 10
-    maximum_lag_on_failover: 1048576
+vrrp_instance VI_1 {
+    state BACKUP
+    interface ens33
+    virtual_router_id 51
+    priority 100
+    advert_int 1
+    unicast_src_ip 192.168.120.132
+    unicast_peer {
+        192.168.120.131
+    }
+    authentication {
+        auth_type PASS
+        auth_pass 1111
+    }
+    virtual_ipaddress {
+        192.168.120.200/24
+    }
+    track_script {
+        check_patroni
+    }
+}
 
-  initdb:
-    - encoding: UTF8
-    - data-checksums
+sudo vim check_patroni.sh
 
-  pg_hba:
-    - host replication repl 192.168.120.0/24 md5
-    - host all all 192.168.120.0/24 md5
+#!/bin/bash
+status=$(/usr/local/bin/patroni -c /etc/patroni/patroni.yml list | grep $(hostname) | awk '{print $6}')
+if [ "$status" = "Leader" ]; then
+    exit 0
+else
+    exit 1
+fi
 
-  users:
-    admin:
-      password: admin123
-      options:
-        - createrole
-        - createdb
-
-postgresql:
-  listen: 0.0.0.0:5432
-  connect_address: 192.168.120.131:5432
-
-  data_dir: /var/lib/postgresql/12/main
-  config_dir: /etc/postgresql/12/main
-  bin_dir: /usr/lib/postgresql/12/bin
-
-  authentication:
-    superuser:
-      username: postgres
-      password: Pg@123456
-    replication:
-      username: repl
-      password: Pg@123456
-
-  parameters:
-    wal_level: replica
-    max_wal_senders: 10
-    wal_keep_size: 1GB
-    hot_standby: "on"
-    
-    
-    
-    
-    
-    
-```
-
-
-
-```shell
-scope: pg-ha
-name: pg2
-namespace: /db/
-
-restapi:
-  listen: 0.0.0.0:8008
-  connect_address: 192.168.120.132:8008
-
-etcd:
-  hosts:
-    - 192.168.120.131:2379
-    - 192.168.120.132:2379
-    - 192.168.120.133:2379
-
-postgresql:
-  listen: 0.0.0.0:5432
-  connect_address: 192.168.120.132:5432
-
-  data_dir: /var/lib/postgresql/12/main
-  config_dir: /etc/postgresql/12/main
-  bin_dir: /usr/lib/postgresql/12/bin
-
-  use_pg_rewind: true
-
-  authentication:
-    superuser:
-      username: postgres
-      password: Pg@123456
-    replication:
-      username: repl
-      password: Pg@123456
-
-  parameters:
-    wal_level: replica
-    max_wal_senders: 10
-    wal_keep_size: 1GB
-    hot_standby: "on"
+sudo chmod +x /etc/keepalived/check_patroni.sh
 ```
 
