@@ -424,6 +424,9 @@ else
 fi
 
 sudo chmod +x /etc/keepalived/check_patroni.sh
+
+sudo systemctl restart keepalived
+sudo systemctl enable keepalived
 ```
 
 
