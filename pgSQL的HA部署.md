@@ -1,4 +1,8 @@
-## pgSQL的HA部署
+# pgSQL的HA部署
+
+
+
+[TOC]
 
 
 
@@ -106,13 +110,7 @@ e90bd99ffe7a66ba: name=etcd1 peerURLs=http://192.168.120.131:2380 clientURLs=htt
 
 
 
-
-
-#### 节点1中配置 Patroni + VIP
-
-
-
-
+#### 节点1中配置 Patroni 
 
 Patroni配置
 
@@ -177,61 +175,15 @@ EOF'
 
 
 
-Keeplived VIP配置
 
 
-
-```shell
-sudo vim /etc/keepalived/keepalived.conf
-
-global_defs {
-   router_id PG_MASTER
-}
-
-vrrp_script check_leader {
-    script "/usr/bin/curl -s http://127.0.0.1:8008/master | grep true > /dev/null"
-    interval 2
-    weight 20
-}
-
-vrrp_instance VI_PG {
-    state MASTER
-    interface eth0
-    virtual_router_id 51
-    priority 100
-    advert_int 1
-    authentication {
-        auth_type PASS
-        auth_pass 123456
-    }
-    virtual_ipaddress {
-        192.168.120.100/24
-    }
-    track_script {
-        check_leader
-    }
-}
-
-```
-
-
-
-
-
-
-
-#### 节点2中配置 Patroni + VIP
-
-
-
-
+#### 节点2中配置 Patroni 
 
 Patroni配置
 
 ```shell
 sudo mkdir -p /etc/patroni
 sudo vim /etc/patroni/patroni.yml
-
 scope: pg-ha
 name: hadoop2
 namespace: /db/
@@ -271,44 +223,6 @@ postgresql:
 sudo sh -c 'cat >> /usr/lib/tmpfiles.d/postgresql.conf << EOF
 d /var/run/postgresql/12-main.pg_stat_tmp 0700 postgres postgres -
 EOF'
-```
-
-
-
-Keeplived VIP配置
-
-
-
-```shell
-sudo vim /etc/keepalived/keepalived.conf
-
-global_defs {
-   router_id PG_BACKUP
-}
-
-vrrp_script check_leader {
-    script "/usr/bin/curl -s http://127.0.0.1:8008/master | grep true > /dev/null"
-    interval 2
-    weight 20
-}
-
-vrrp_instance VI_PG {
-    state BACKUP
-    interface eth0
-    virtual_router_id 51
-    priority 80
-    advert_int 1
-    authentication {
-        auth_type PASS
-        auth_pass 123456
-    }
-    virtual_ipaddress {
-        192.168.120.100/24
-    }
-    track_script {
-        check_leader
-    }
-}
 
 ```
 
@@ -316,7 +230,9 @@ vrrp_instance VI_PG {
 
 
 
-#### 配置服务启动
+
+
+#### Patroni 配置服务启动
 
 ​	在hadoop1和hadoop2中都配置
 
@@ -342,8 +258,17 @@ sudo systemctl enable --now patroni
 sudo systemctl enable --now keepalived
 
 
+# 验证
 patronictl -c /etc/patroni/patroni.yml list
+# 显示如下为正常
++ Cluster: pg-ha (7643451515583566297) -----------+----+-------------+-----+------------+-----+
+| Member  | Host            | Role    | State     | TL | Receive LSN | Lag | Replay LSN | Lag |
++---------+-----------------+---------+-----------+----+-------------+-----+------------+-----+
+| hadoop1 | 192.168.120.131 | Replica | streaming | 10 |   0/90001F8 |   0 |  0/90001F8 |   0 |
+| hadoop2 | 192.168.120.132 | Leader  | running   | 10 |             |     |            |     |
++---------+-----------------+---------+-----------+----+-------------+-----+------------+-----+
 
+# 以下为修复的操作
 journalctl -u patroni -f
 
 
@@ -359,7 +284,6 @@ sudo systemctl reset-failed patroni
 sudo systemctl start patroni
 
 
-
 sudo mkdir -p /var/lib/postgresql/12/main
 sudo chown -R postgres:postgres /var/lib/postgresql/12
 sudo chmod 700 /var/lib/postgresql/12/main
@@ -371,9 +295,9 @@ sudo -u postgres /usr/lib/postgresql/12/bin/initdb -D /var/lib/postgresql/12/mai
 
 
 
-### keepalived
+### keepalived配置
 
-
+#### hadoop1配置
 
 ```shell
 # hadoop1
@@ -416,7 +340,7 @@ vrrp_instance VI_1 {
 sudo vim check_patroni.sh
 
 #!/bin/bash
-status=$(/usr/local/bin/patroni -c /etc/patroni/patroni.yml list | grep $(hostname) | awk '{print $6}')
+status=$(/usr/local/bin/patronictl -c /etc/patroni/patroni.yml list | grep $(hostname) | awk '{print $6}')
 if [ "$status" = "Leader" ]; then
     exit 0
 else
@@ -431,7 +355,7 @@ sudo systemctl enable keepalived
 
 
 
-
+#### hadoop2配置
 
 ```shell
 # hadoop2
@@ -482,5 +406,124 @@ else
 fi
 
 sudo chmod +x /etc/keepalived/check_patroni.sh
+
+sudo systemctl restart keepalived
+sudo systemctl enable keepalived
+
 ```
+
+#### keepalive验证
+
+
+
+```shell
+
+# 查看vip在哪个设备上生效
+ip addr show ens33
+systemctl status keepalived.service
+
+# 检查是否和主库在同一个设备上
+```
+
+
+
+## postgres基本操作
+
+
+
+
+
+
+
+```shell
+# 进入postgres
+psql -h 127.0.0.1 -U postgres -d postgres
+
+# 查看所有数据库
+\l
+# 连接/切换数据库（例如切换到 testdb）
+\c testdb
+# 查看当前库下的所有表
+\dt
+# 查看表结构（例如查看 user 表）
+\d user
+# 查看所有用户（角色）
+\du
+# 退出 psql
+\q
+# 清空屏幕
+\clear
+# 查看命令帮助
+\?
+
+
+
+# 创建一张测试表
+CREATE TABLE test(id int, name text);
+# 插入一条数据
+INSERT INTO test VALUES (1, '测试数据');
+# 显示表中所有数据
+SELECT * FROM test;
+```
+
+
+
+#### 测试
+
+```sql
+-- 访问数据库
+psql -h 192.168.120.200 -U postgres
+-- 进入测试数据库
+\c testdb
+-- 建表，写数据
+CREATE TABLE device_data (
+    id          SERIAL PRIMARY KEY,                -- 自增主键ID
+    create_time TIMESTAMPTZ NOT NULL DEFAULT NOW(),-- 带时区时间戳，自动当前时间
+    temperature NUMERIC(12, 4) NOT NULL,           -- 温度，总共12位，小数点后4位
+    voltage     NUMERIC(12, 4) NOT NULL,           -- 电压，小数点后4位
+    current     NUMERIC(12, 4) NOT NULL            -- 电流，小数点后4位
+);
+
+INSERT INTO device_data (temperature, voltage, current)
+VALUES (24.1234, 221.5678, 2.1020);
+
+SELECT * FROM device_data;
+
+INSERT INTO device_data (temperature, voltage, current)
+SELECT
+    random() * 40 + 10,     -- 温度 10~50 度，随机小数
+    random() * 10 + 210,    -- 电压 210~220V
+    random() * 5 + 0.1      -- 电流 0.1~5.1A
+FROM generate_series(1, 1000000);  -- 100万行
+
+SELECT count(*) FROM device_data;
+
+-- 给表增加一列 temperature2，数据类型和 temperature 一致
+ALTER TABLE device_data ADD COLUMN temperature2 NUMERIC(12,4);
+INSERT INTO device_data (temperature, voltage, current, temperature2)
+VALUES (25.1234, 220.5678, 1.1020, 26.4321);
+
+-- 给表增加一列 temperature3，数据类型和 temperature 一致，并给默认值
+ALTER TABLE device_data ADD COLUMN temperature3 NUMERIC(12,4) DEFAULT 0.0000;
+
+-- 修改列名
+ALTER TABLE device_data RENAME COLUMN temperature2 TO temperature_in;
+
+-- 删除 temperature 这一列
+ALTER TABLE device_data DROP COLUMN temperature;
+
+
+INSERT INTO device_data (voltage, current, temperature_in, temperature3)
+SELECT
+  220 + (random() * 5),        -- 电压 220左右
+  1.5 + (random() * 2),        -- 电流 1.5~3.5A
+  25 + (random() * 10),        -- 温度1
+  25 + (random() * 10)         -- 温度3
+FROM generate_series(1, 2000000); -- 正好 2000000 行
+
+
+
+```
+
+
 
