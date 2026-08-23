@@ -497,6 +497,7 @@ SELECT
 FROM generate_series(1, 1000000);  -- 100万行
 
 SELECT count(*) FROM device_data;
+SELECT *  FROM device_data  ORDER BY id DESC  LIMIT 10;
 
 -- 给表增加一列 temperature2，数据类型和 temperature 一致
 ALTER TABLE device_data ADD COLUMN temperature2 NUMERIC(12,4);
@@ -520,6 +521,16 @@ SELECT
   25 + (random() * 10),        -- 温度1
   25 + (random() * 10)         -- 温度3
 FROM generate_series(1, 2000000); -- 正好 2000000 行
+
+
+INSERT INTO device_data (voltage, current, temperature_in, temperature_in2, temperature4)
+SELECT
+  220 + (random() * 5),        -- 电压 220左右
+  1.5 + (random() * 2),        -- 电流 1.5~3.5A
+  25 + (random() * 10),        -- 温度1
+  25 + (random() * 10)         -- 温度3
+  25 + (random() * 10)         -- 温度3
+FROM generate_series(1, 10); -- 正好 2000000 行
 
 
 
